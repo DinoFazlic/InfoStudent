@@ -22,7 +22,7 @@ def get_student_profile():
         "first_name": "Robert",
         "last_name": "Marić",
         "email": "robert@student.pmf.unsa.ba",
-        "biography": "I am a math student...",
+        "biography": "I am a math student at PMF",
         "skills": ["python", "react"],
         "experience": "Worked on cool projects!"
     }
