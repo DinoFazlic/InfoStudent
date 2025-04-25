@@ -1,12 +1,21 @@
-import React from 'react';
-import styles from './styles/App.module.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
-function App() {
+
+
+export default function App() {
   return (
-    <div className={styles.app}> {}
-      <h1>Info Student</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+  
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
