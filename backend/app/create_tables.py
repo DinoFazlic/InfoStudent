@@ -1,9 +1,6 @@
-# create_tables.py
 from sqlmodel import SQLModel
 from database import engine
 import models
-
-
 
 
 

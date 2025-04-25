@@ -18,14 +18,14 @@ class Job(SQLModel, table=True):
     created_at: Optional[datetime] = Field(default=None)
     updated_at: Optional[datetime] = Field(default=None)
 
-class JobSchedule(SQLModel, table=True):
+class Job_Schedule(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     job_id: int = Field(foreign_key="job.id")
     day: str
     start_time: time
     end_time: time
 
-class JobApplication(SQLModel, table=True):
+class Job_Application(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     job_id: int = Field(foreign_key="job.id")
     student_id: int = Field(foreign_key="user.id")
