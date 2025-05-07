@@ -8,21 +8,19 @@ class RegisterRequest(BaseModel):
     password: str
     city: Optional[str] = None
     contact_phone: Optional[str] = None
-    role: Literal["student", "employer"]
-    biography: Optional[str] = None  
+    role: Literal["student", "employer", "admin"]
+    biography: Optional[str] = None
     skills: Optional[List[str]] = []
     experience: Optional[str] = None
     cv_url: Optional[str] = None
-    company_name: Optional[str] = None 
+    company_name: Optional[str] = None
     company_description: Optional[str] = None
     address: Optional[str] = None
     website_url: Optional[str] = None
-    
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
-
 
 class ResetPasswordRequest(BaseModel):
     token: str

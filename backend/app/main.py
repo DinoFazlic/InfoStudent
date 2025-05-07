@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from sqlmodel import SQLModel
 from app.routes import auth
 from app import models,database
 from app.database import engine
@@ -19,9 +20,9 @@ app.add_middleware(
 )
 
 @app.get("/")
-def read_root():
-    return {"message": "Info Student is running!"}
+def root():
+    return {"message": "InfoStudent is running!"}
 
-models.Base.metadata.create_all(bind=database.engine)
+SQLModel.metadata.create_all(bind=engine)
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
