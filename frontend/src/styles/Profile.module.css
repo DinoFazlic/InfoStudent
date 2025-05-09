@@ -1,0 +1,297 @@
+.pageWrapper {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eef2f7 0%, #d7dde8 100%);
+}
+
+.mobileHeader {
+  position: fixed;
+  top: 20px;
+  left: 0;
+  width: 50px;
+  height: 50px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background: #f9fafb;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  padding: 25px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+@media (min-width: 769px) {
+  .sidebar {
+    transform: translateX(0);
+  }
+
+  .menuToggleIcon {
+    display: none;
+  }
+
+  .mobileHeader {
+    display: none;
+  }
+
+  .mainContent {
+    margin-left: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .menuToggleIcon {
+    top: 50%;
+    display: block;
+    position: fixed;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .mainContent {
+    margin-left: 0;
+  }
+}
+
+.profilePhotoWrapperSidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.profilePhoto {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e0e7ff;
+  border: 2px solid #d0d7e6;
+}
+
+.photoPlaceholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: #60a5fa;
+  font-weight: bold;
+}
+
+.editPhotoButton {
+  position: fixed;
+  top: 100px;
+  right: 75px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 100%;
+  padding: 6px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.profileName {
+  margin-top: 12px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+}
+
+.averageScore {
+  font-size: 1rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.sidebarBtn, .sidebarBtnLogout {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 1.1rem;
+  color: #3b82f6;
+  padding: 14px 18px;
+  margin: 8px 0;
+  border-radius: 10px;
+  transition: background 0.25s;
+  cursor: pointer;
+}
+
+.sidebarBtn:hover, .sidebarBtnLogout:hover {
+  background: #e0e7ff;
+}
+
+.sidebarBtnLogout {
+  margin-top: auto;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 40px;
+  transition: margin-left 0.3s ease;
+  display: flex;
+  justify-content: center;
+}
+
+.sectionContent {
+  background: #ffffff;
+  padding: 35px 45px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  max-width: 800px;
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.profileFormWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #475569;
+}
+
+.formGroup input, .formGroup textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.formGroup input:disabled, .formGroup textarea:disabled {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.stars {
+  color: #fbbf24;
+  font-size: 1.3rem;
+}
+
+.buttonGroup {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+}
+
+.editButton, .saveButton {
+  padding: 12px 30px;
+  font-size: 1.05rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.saveButton {
+  background-color: #10b981;
+}
+
+.editButton:hover, .saveButton:hover {
+  background-color: #2563eb;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.reviewCard {
+  width: 90%;
+  max-width: 500px;
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 12px rgba(50, 90, 140, 0.07);
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.reviewName {
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.reviewRating {
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+.reviewText {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #374151;
+  font-size: 1rem;
+  resize: none;
+}
+
+.averageScoreDisplay {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  color: #1e293b;
+}
