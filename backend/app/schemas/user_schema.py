@@ -25,3 +25,70 @@ class LoginRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: constr(min_length=6)
+
+
+class StudentProfileOut(BaseModel):
+    biography: Optional[str]
+    skills: Optional[List[str]]
+    experience: Optional[str]
+    cv_url: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+class EmployerProfileOut(BaseModel):
+    company_name: Optional[str]
+    company_description: Optional[str]
+    address: Optional[str]
+    website_url: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+class UserRead(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: EmailStr
+    role: str
+    city: Optional[str]
+    contact_phone: Optional[str]
+    
+    student_profile: Optional[StudentProfileOut] = None
+    employer_profile: Optional[EmployerProfileOut] = None
+
+    class Config:
+        orm_mode = True
+
+
+class UpdateStudentProfileRequest(BaseModel):
+    # User fields
+    first_name: Optional[str]
+    last_name: Optional[str]
+    city: Optional[str]
+    contact_phone: Optional[str]
+
+    # Student profile fields
+    biography: Optional[str]
+    skills: Optional[List[str]]
+    experience: Optional[str]
+    cv_url: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+class UpdateEmployerProfileRequest(BaseModel):
+    # User fields
+    first_name: Optional[str]
+    last_name: Optional[str]
+    city: Optional[str]
+    contact_phone: Optional[str]
+
+    # Employer profile fields
+    company_name: Optional[str]
+    company_description: Optional[str]
+    address: Optional[str]
+    website_url: Optional[str]
+
+    class Config:
+        from_attributes = True

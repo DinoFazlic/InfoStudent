@@ -44,24 +44,78 @@ function EmployerProfile() {
     { name: "Lejla Smajić", comment: "Top poslodavac!", rating: 5 }
   ];
 
-  useEffect(function () {
-    fetch("http://localhost:8000/users/employer_profile")
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        setProfile(data);
-        setForm(data);
+  useEffect(() => {
+    fetch("http://localhost:8000/auth/users/me", {
+      credentials: "include"
+    })
+      .then((res) => {
+      if (res.status === 401) {
+        window.location.href = "/login"; 
+      }
+      return res.json();
+      })
+      .then((data) => {
+        const employerData = {
+          ...data,
+          ...data.employer_profile, // spaja user i profil
+        };
+        setProfile(employerData);
+        setForm(employerData); // ako koristiš formu
       });
   }, []);
+
+  function handleLogout() {
+  fetch("http://localhost:8000/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  })
+    .then(() => {
+      window.location.href = "/login";
+    })
+    .catch((err) => {
+      console.error("Logout failed:", err);
+    });
+  }
 
   function handleEditPhoto() {
     alert("Change photo (upload coming soon!)");
   }
 
   function handleSaveChanges() {
-    setProfile(form);
-    setEditMode(false);
-    alert("Saved changes locally (backend coming soon!)");
+  const updatedData = {
+    first_name: form.first_name,
+    last_name: form.last_name,
+    company_name: form.company_name,
+    company_description: form.company_description,
+    address: form.address,
+    website_url: form.website_url,
+    contact_phone: form.contact_phone,
+    city: form.city
+  };
+
+  fetch("http://localhost:8000/auth/users/me/employer", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(updatedData),
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Failed to update employer profile");
+      }
+      return res.json();
+    })
+    .then(() => {
+      setProfile(form);
+      setEditMode(false);
+    })
+    .catch((err) => {
+      console.error("Update failed:", err);
+    });
   }
+
 
   function handleChange(event) {
     const name = event.target.name;
@@ -83,10 +137,6 @@ function EmployerProfile() {
     return (firstLetter + lastLetter).toUpperCase();
   }
 
-  function handleLogout() {
-    alert("Logging out...");
-  }
-
   const averageScore = (
     reviewsReceived.reduce(function (total, review) {
       return total + review.rating;
@@ -99,6 +149,24 @@ function EmployerProfile() {
         <div className={styles.sectionContent}>
           <h2 className={styles.sectionTitle}>Edit Company Profile</h2>
           <div className={styles.profileFormWrapper}>
+            <div className={styles.formGroup}>
+              <label>First Name:</label>
+              <input
+                name="first_name"
+                value={form.first_name || ""}
+                onChange={handleChange}
+                disabled={!editMode}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Last Name:</label>
+              <input
+                name="last_name"
+                value={form.last_name || ""}
+                onChange={handleChange}
+                disabled={!editMode}
+              />
+            </div>
             <div className={styles.formGroup}>
               <label>Company Name:</label>
               <input

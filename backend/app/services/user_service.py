@@ -26,9 +26,11 @@ def register_user(data: RegisterRequest, db: Session):
     )
 
     db_user = user_repository.create_user(db, new_user)
+    db.refresh(db_user) 
+    print("REGISTER ROLE:", data.role)
 
     if data.role == "student":
-        student_profile = StudentProfile(
+        student_profile = Students(
             user_id=db_user.id,
             biography=data.biography,
             skills=data.skills,
@@ -38,7 +40,7 @@ def register_user(data: RegisterRequest, db: Session):
         db.add(student_profile)
 
     elif data.role == "employer":
-        employer_profile = EmployerProfile(
+        employer_profile = Employers(
             user_id=db_user.id,
             company_name=data.company_name,
             company_description=data.company_description,

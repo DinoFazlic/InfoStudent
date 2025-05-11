@@ -56,18 +56,26 @@ function StudentProfile() {
   ];
 
   // Fetch data from FastAPI backend
-  useEffect(function () {
-    fetch("http://localhost:8000/users/student_profile")
-      .then(function (res) {
-        return res.json();
+  useEffect(() => {
+    fetch("http://localhost:8000/auth/users/me", {
+      credentials: "include"
+    })
+      .then((res) => {
+      if (res.status === 401) {
+        window.location.href = "/login"; 
+      }
+      return res.json();
       })
-      .then(function (data) {
-        setProfile(data);
+      .then((data) => {
+        const studentData = {
+          ...data,
+          ...data.student_profile,
+        };
+        setProfile(studentData);
       })
-      .catch(function (err) {
-        console.log("Error fetching profile:", err);
-      });
+      .catch((err) => console.log("Error:", err));
   }, []);
+
 
   // If not loaded yet
   if (!profile) {
@@ -83,7 +91,16 @@ function StudentProfile() {
 
   // Click handlers
   function handleLogout() {
-    alert("Logging out...");
+  fetch("http://localhost:8000/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  })
+    .then(() => {
+      window.location.href = "/login";
+    })
+    .catch((err) => {
+      console.error("Logout failed:", err);
+    });
   }
 
   function handleEditPhoto() {
@@ -91,92 +108,191 @@ function StudentProfile() {
   }
 
   function handleSaveChanges() {
-    alert("Saved changes locally (backend coming soon!)");
-    setEditMode(false);
+  const updatedData = {
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    city: profile.city,
+    contact_phone: profile.contact_phone,
+    biography: profile.biography,
+    skills: profile.skills,
+    experience: profile.experience,
+    cv_url: profile.cv_url,
+  };
+
+  fetch("http://localhost:8000/auth/users/me/student", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(updatedData),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to update");
+      return res.json();
+    })
+    .then(() => {
+      setEditMode(false);
+    })
+    .catch((err) => {
+      console.error("Update failed:", err);
+    });
   }
 
-  function renderSection() {
-    if (activeSection === "profile") {
-      return (
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>Edit Profile</h2>
-          <div className={styles.profileFormWrapper}>
-            <div className={styles.formGroup}>
-              <label>First Name:</label>
-              <input value={profile.first_name ? profile.first_name : ""} disabled={!editMode} />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Last Name:</label>
-              <input value={profile.last_name ? profile.last_name : ""} disabled={!editMode} />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Email:</label>
-              <input value={profile.email ? profile.email : ""} disabled />
-            </div>
-            <div className={styles.formGroup}>
-              <label>City:</label>
-              <input value={profile.city ? profile.city : ""} disabled={!editMode} />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Biography:</label>
-              <textarea value={profile.biography ? profile.biography : ""} disabled={!editMode} rows={3} />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Skills (comma separated):</label>
-              <input value={profile.skills ? profile.skills.join(", ") : ""} disabled={!editMode} />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Experience:</label>
-              <textarea value={profile.experience ? profile.experience : ""} disabled={!editMode} rows={2} />
-            </div>
-            <div className={styles.formGroup}>
-              <label>CV / Resume (URL):</label>
-              <input value={profile.cv_url ? profile.cv_url : ""} disabled={!editMode} />
-            </div>
-            <div className={styles.buttonGroup}>
-              <button
-                onClick={editMode ? handleSaveChanges : function () { setEditMode(true); }}
-                className={editMode ? styles.saveButton : styles.editButton}
-              >
-                {editMode ? "Save Changes" : "Edit Profile"}
-              </button>
-            </div>
+
+function renderSection() {
+  if (activeSection === "profile") {
+    return (
+      <div className={styles.sectionContent}>
+        <h2 className={styles.sectionTitle}>Edit Profile</h2>
+        <div className={styles.profileFormWrapper}>
+          <div className={styles.formGroup}>
+            <label>First Name:</label>
+            <input
+              value={profile.first_name || ""}
+              disabled={!editMode}
+              onChange={(e) =>
+                setProfile((prev) => ({ ...prev, first_name: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Last Name:</label>
+            <input
+              value={profile.last_name || ""}
+              disabled={!editMode}
+              onChange={(e) =>
+                setProfile((prev) => ({ ...prev, last_name: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Email:</label>
+            <input value={profile.email || ""} disabled />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Contact Phone:</label>
+            <input
+              value={profile.contact_phone || ""}
+              disabled={!editMode}
+              onChange={(e) =>
+                setProfile((prev) => ({ ...prev, contact_phone: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>City:</label>
+            <input
+              value={profile.city || ""}
+              disabled={!editMode}
+              onChange={(e) =>
+                setProfile((prev) => ({ ...prev, city: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Biography:</label>
+            <textarea
+              value={profile.biography || ""}
+              rows={3}
+              disabled={!editMode}
+              onChange={(e) =>
+                setProfile((prev) => ({ ...prev, biography: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Skills (comma separated):</label>
+            <input
+              value={profile.skills ? profile.skills.join(", ") : ""}
+              disabled={!editMode}
+              onChange={(e) =>
+                setProfile((prev) => ({
+                  ...prev,
+                  skills: e.target.value.split(",").map((s) => s.trim()),
+                }))
+              }
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Experience:</label>
+            <textarea
+              value={profile.experience || ""}
+              rows={2}
+              disabled={!editMode}
+              onChange={(e) =>
+                setProfile((prev) => ({ ...prev, experience: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>CV / Resume (URL):</label>
+            <input
+              value={profile.cv_url || ""}
+              disabled={!editMode}
+              onChange={(e) =>
+                setProfile((prev) => ({ ...prev, cv_url: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className={styles.buttonGroup}>
+            <button
+              onClick={
+                editMode
+                  ? handleSaveChanges
+                  : () => setEditMode(true)
+              }
+              className={editMode ? styles.saveButton : styles.editButton}
+            >
+              {editMode ? "Save Changes" : "Edit Profile"}
+            </button>
           </div>
         </div>
-      );
-    }
-
-    if (activeSection === "myReviews") {
-      return (
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>Your Rating</h2>
-          <div className={styles.averageScoreDisplay}>
-            {averageScore}/5 <Stars rating={averageScore} />
-          </div>
-          <div className={styles.reviewsList}>
-            {reviewsReceived.map(function (review, index) {
-              return <ReviewCard key={index} name={review.name} comment={review.comment} rating={review.rating} />;
-            })}
-          </div>
-        </div>
-      );
-    }
-
-    if (activeSection === "reviewsHistory") {
-      return (
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>My Ratings History</h2>
-          <div className={styles.reviewsList}>
-            {myReviews.map(function (review, index) {
-              return <ReviewCard key={index} name={review.name} comment={review.comment} rating={review.rating} />;
-            })}
-          </div>
-        </div>
-      );
-    }
-
-    return null;
+      </div>
+    );
   }
+
+  if (activeSection === "myReviews") {
+    return (
+      <div className={styles.sectionContent}>
+        <h2 className={styles.sectionTitle}>Your Rating</h2>
+        <div className={styles.averageScoreDisplay}>
+          {averageScore}/5 <Stars rating={averageScore} />
+        </div>
+        <div className={styles.reviewsList}>
+          {reviewsReceived.map((review, index) => (
+            <ReviewCard key={index} {...review} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeSection === "reviewsHistory") {
+    return (
+      <div className={styles.sectionContent}>
+        <h2 className={styles.sectionTitle}>My Ratings History</h2>
+        <div className={styles.reviewsList}>
+          {myReviews.map((review, index) => (
+            <ReviewCard key={index} {...review} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 
   return (
     <div className={styles.pageWrapper}>

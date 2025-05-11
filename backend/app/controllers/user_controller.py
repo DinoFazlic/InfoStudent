@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from fastapi.responses import Response
 from app.schemas.user_schema import RegisterRequest, LoginRequest
 from app.services import user_service
-from app.routes import auth 
 from app.utils.jwt import create_access_token
 from jose import jwt
 import os 
@@ -19,7 +18,7 @@ def register_controller(data: RegisterRequest, response: Response, db: Session):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    token = auth.create_access_token({"sub": str(user.id)})
+    token = create_access_token({"sub": str(user.id)})
     response.set_cookie(
         key="access_token",
         value=token,
