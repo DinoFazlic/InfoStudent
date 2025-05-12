@@ -9,3 +9,7 @@ router = APIRouter()
 @router.post("/register")
 def register_user(data: RegisterRequest, response: Response, db: Session = Depends(get_db)):
     return user_controller.register_controller(data, response, db)
+
+@router.options("/register")
+def preflight_register_handler():
+    return Response(status_code=200)

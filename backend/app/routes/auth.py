@@ -31,6 +31,11 @@ def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
 def register(data: RegisterRequest, response: Response, db: Session = Depends(get_db)):
     return register_controller(data, response, db)
 
+@router.options("/register")
+def preflight_register_handler():
+    return Response(status_code=200)
+
+
 @router.get("/users/me", response_model=UserRead)
 def get_logged_in_user(current_user: User = Depends(get_current_user)):
     return current_user
