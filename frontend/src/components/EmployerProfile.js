@@ -78,8 +78,41 @@ function EmployerProfile() {
   }
 
   function handleEditPhoto() {
-    alert("Change photo (upload coming soon!)");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = async function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("http://localhost:8000/users/employer/profile/profile-photo", {
+          method: "PUT",
+          credentials: "include",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          setProfile((prev) => ({
+            ...prev,
+            profile_photo_url: data.photo_url,
+          }));
+        } else {
+          console.error("Failed to upload image:", data.detail);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+      }
+    };
+
+    input.click();
   }
+
 
   function handleSaveChanges() {
   const updatedData = {
@@ -93,7 +126,7 @@ function EmployerProfile() {
     city: form.city
   };
 
-  fetch("http://localhost:8000/auth/users/me/employer", {
+  fetch("http://localhost:8000/users/employer/profile", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -177,6 +210,14 @@ function EmployerProfile() {
               />
             </div>
             <div className={styles.formGroup}>
+              <label>Email:</label>
+              <input
+                name="email"
+                value={form.email || ""}
+                disabled
+              />
+            </div>
+            <div className={styles.formGroup}>
               <label>Company Description:</label>
               <textarea
                 name="company_description"
@@ -220,14 +261,6 @@ function EmployerProfile() {
                 value={form.contact_phone || ""}
                 onChange={handleChange}
                 disabled={!editMode}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Email:</label>
-              <input
-                name="email"
-                value={form.email || ""}
-                disabled
               />
             </div>
             <div className={styles.buttonGroup}>
@@ -290,10 +323,8 @@ function EmployerProfile() {
       <div className={styles.sidebar + (sidebarOpen ? " " + styles.open : "")}>
         <div className={styles.profilePhotoWrapperSidebar}>
           {profile.profile_photo_url
-            ? <img src={profile.profile_photo_url} alt="Profile" className={styles.profilePhoto} />
-            : <div className={styles.photoPlaceholder}>
-                {getInitials(profile.first_name, profile.last_name) || <FiUser size={48} />}
-              </div>}
+            ? <img src={`http://localhost:8000${profile.profile_photo_url}`} alt="Profile" className={styles.profilePhoto} />
+            : <div className={styles.photoPlaceholder}><FiUser size={48} /></div>}
           <button onClick={handleEditPhoto} className={styles.editPhotoButton}>✏️</button>
           <div className={styles.profileName}>{profile.first_name} {profile.last_name}</div>
           <div className={styles.averageScore}>{averageScore}/5 <Stars rating={averageScore} /></div>

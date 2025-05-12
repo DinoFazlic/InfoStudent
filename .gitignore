@@ -4,3 +4,7 @@ backend/venv/
 
 __pycache__/
 *.py[cod]
+
+# Ignore uploaded profile pictures
+backend/app/static/profile_photos/
+backend/app/static/cv_uploads/

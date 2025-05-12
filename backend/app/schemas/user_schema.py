@@ -53,7 +53,9 @@ class UserRead(BaseModel):
     role: str
     city: Optional[str]
     contact_phone: Optional[str]
-    
+    profile_photo_url: Optional[str]
+
+
     student_profile: Optional[StudentProfileOut] = None
     employer_profile: Optional[EmployerProfileOut] = None
 
@@ -72,7 +74,6 @@ class UpdateStudentProfileRequest(BaseModel):
     biography: Optional[str]
     skills: Optional[List[str]]
     experience: Optional[str]
-    cv_url: Optional[str]
 
     class Config:
         from_attributes = True

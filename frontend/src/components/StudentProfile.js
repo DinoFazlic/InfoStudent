@@ -104,8 +104,75 @@ function StudentProfile() {
   }
 
   function handleEditPhoto() {
-    alert("Change profile photo (upload coming soon!)");
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.onchange = async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("http://localhost:8000/users/student/profile/profile-photo", {
+        method: "PUT",
+        credentials: "include",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setProfile((prev) => ({
+          ...prev,
+          profile_photo_url: data.photo_url,
+        }));
+      } else {
+        console.error("Failed to upload image:", data.detail);
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+    }
+  };
+  input.click();
   }
+
+  function handleUploadCV() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".pdf,.doc,.docx";
+
+  input.onchange = async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("http://localhost:8000/users/student/profile/cv", {
+        method: "PUT",
+        credentials: "include",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setProfile((prev) => ({
+          ...prev,
+          cv_url: data.cv_url,
+        }));
+      } else {
+        console.error("Failed to upload CV:", data.detail);
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+    }
+  };
+
+  input.click();
+  }
+
 
   function handleSaveChanges() {
   const updatedData = {
@@ -115,11 +182,10 @@ function StudentProfile() {
     contact_phone: profile.contact_phone,
     biography: profile.biography,
     skills: profile.skills,
-    experience: profile.experience,
-    cv_url: profile.cv_url,
+    experience: profile.experience
   };
 
-  fetch("http://localhost:8000/auth/users/me/student", {
+  fetch("http://localhost:8000/users/student/profile", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -234,15 +300,31 @@ function renderSection() {
           </div>
 
           <div className={styles.formGroup}>
-            <label>CV / Resume (URL):</label>
-            <input
-              value={profile.cv_url || ""}
-              disabled={!editMode}
-              onChange={(e) =>
-                setProfile((prev) => ({ ...prev, cv_url: e.target.value }))
-              }
-            />
+            <label>CV / Resume:</label>
+
+            {profile.cv_url ? (
+              <div className={styles.cvRow}>
+                <a
+                  href={`http://localhost:8000${profile.cv_url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.downloadLink}
+                >
+                  View Uploaded CV
+                </a>
+                <span className={styles.separator}>|</span>
+                <button onClick={handleUploadCV} className={styles.uploadCVButton}>
+                  Upload New
+                </button>
+              </div>
+            ) : (
+              <button onClick={handleUploadCV} className={styles.uploadCVButton}>
+                Upload CV
+              </button>
+            )}
           </div>
+
+
 
           <div className={styles.buttonGroup}>
             <button
@@ -302,8 +384,8 @@ function renderSection() {
           onClick={function () { setSidebarOpen(!sidebarOpen); }}
         >
           {sidebarOpen
-            ? <img src="/favicons/left_arrow_icon.png" alt="Close" width={20} height={20} style={{ marginLeft: "400px" }} />
-            : <img src="/favicons/right_arrow_icon.png" alt="Open" width={24} height={24} />
+            ? <img src="/favicons/left_arrow_icon.png" alt="Close" width={20} height={20} style={{transform: "translateX(210px)", transition: "transform 0.3s ease"}} />
+            : <img src="/favicons/right_arrow_icon.png" alt="Open" width={24} height={24} style={{transform: "translateX(0px)", transition: "transform 0.3s ease"}}/>
           }
         </button>
       </div>
@@ -311,7 +393,7 @@ function renderSection() {
       <div className={styles.sidebar + (sidebarOpen ? " " + styles.open : "")}>
         <div className={styles.profilePhotoWrapperSidebar}>
           {profile.profile_photo_url && profile.profile_photo_url.length > 0
-            ? <img src={profile.profile_photo_url} alt="Profile" className={styles.profilePhoto} />
+            ? <img   src={`http://localhost:8000${profile.profile_photo_url}`} alt="Profile" className={styles.profilePhoto} />
             : <div className={styles.photoPlaceholder}><FiUser size={48} /></div>}
           <button onClick={handleEditPhoto} className={styles.editPhotoButton}>✏️</button>
           <div className={styles.profileName}>
