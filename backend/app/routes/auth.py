@@ -10,6 +10,8 @@ from app.models.users import User
 from app.schemas.user_schema import UserRead
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from app.utils.auth import get_current_student, get_current_employer
+
 
 
 
@@ -34,6 +36,16 @@ def register(data: RegisterRequest, response: Response, db: Session = Depends(ge
 @router.get("/users/me", response_model=UserRead)
 def get_logged_in_user(current_user: User = Depends(get_current_user)):
     return current_user
+
+@router.get("/users/student/me", response_model=UserRead)
+def get_student_info(current_user: User = Depends(get_current_student)):
+    return current_user
+
+@router.get("/users/employer/me", response_model=UserRead)
+def get_employer_info(current_user: User = Depends(get_current_employer)):
+    return current_user
+
+
 
 @router.post("/logout")
 def logout(response: Response):

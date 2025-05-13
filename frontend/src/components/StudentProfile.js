@@ -2,430 +2,187 @@
 
 import React, { useEffect, useState } from "react";
 import styles from '@/styles/Profile.module.css';
-import { FiUser, FiLogOut } from "react-icons/fi";
 
-// Show stars from 0–5 based on rating number
-function Stars(props) {
-  var fullStars = Math.round(props.rating);
-  var starsArray = [];
+import StudentSidebar from "@/components/StudentProfileSections/StudentSidebar";
+import StudentProfileSection from "@/components/StudentProfileSections/StudentProfileSection";
+import StudentReviewsSection from "@/components/StudentProfileSections/StudentReviewsSection";
+import StudentReviewsGivenSection from "@/components/StudentProfileSections/StudentReviewsGivenSection";
 
-  for (var i = 0; i < 5; i++) {
-    if (i < fullStars) {
-      starsArray.push("★");
-    } else {
-      starsArray.push("☆");
-    }
-  }
-
-  return <span className={styles.stars}>{starsArray.join("")}</span>;
-}
-
-// Shows a single review block
-function ReviewCard(props) {
-  return (
-    <div className={styles.reviewCard}>
-      <div className={styles.reviewHeader}>
-        <span className={styles.reviewName}>{props.name}</span>
-        <span className={styles.reviewRating}>{props.rating}/5</span>
-      </div>
-      <textarea className={styles.reviewText} value={props.comment} disabled rows={2} />
-    </div>
-  );
-}
-
-// Main student profile page
 function StudentProfile() {
-  var [profile, setProfile] = useState(null);
-  var [activeSection, setActiveSection] = useState("profile");
-  var [sidebarOpen, setSidebarOpen] = useState(false);
-  var [editMode, setEditMode] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [activeSection, setActiveSection] = useState("profile");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [reviewsReceived, setReviewsReceived] = useState([]);
+  const [reviewsGiven, setReviewsGiven] = useState([]);
 
-  // Example review data
-  var reviewsReceived = [
-    { name: "Dino Fazlić", comment: "Super instruktor!", rating: 5 },
-    { name: "Ajla Mustafić", comment: "Vrlo ljubazan.", rating: 4 },
-    { name: "Tarik Kovačević", comment: "Preporuka!", rating: 4 },
-    { name: "Lejla Smajić", comment: "Top!", rating: 5 },
-    { name: "Edin Avdić", comment: "Ok.", rating: 3 }
-  ];
-
-  var myReviews = [
-    { name: "PMF Student Jobs", comment: "Super firma.", rating: 5 },
-    { name: "Jasmin S.", comment: "Pomogao mi.", rating: 4 },
-    { name: "Nina Jukić", comment: "Odlična kolegica.", rating: 5 }
-  ];
-
-  // Fetch data from FastAPI backend
   useEffect(() => {
-    fetch("http://localhost:8000/auth/users/me", {
-      credentials: "include"
-    })
-      .then((res) => {
-      if (res.status === 401) {
-        window.location.href = "/login"; 
-      }
-      return res.json();
+    fetch("http://localhost:8000/auth/users/me", { credentials: "include" })
+      .then(res => {
+        if (res.status === 401) window.location.href = "/login";
+        return res.json();
       })
-      .then((data) => {
-        const studentData = {
-          ...data,
-          ...data.student_profile,
-        };
+      .then(data => {
+        if (data.role !== "student") {
+          window.location.href = "/login";
+          return;
+        }
+        const studentData = { ...data, ...data.student_profile };
         setProfile(studentData);
+
+        fetch("http://localhost:8000/reviews/received", { credentials: "include" })
+          .then(res => res.json()).then(setReviewsReceived)
+          .catch(err => console.error("Failed to fetch received reviews:", err));
+
+        fetch("http://localhost:8000/reviews/given", { credentials: "include" })
+          .then(res => res.json()).then(setReviewsGiven)
+          .catch(err => console.error("Failed to fetch given reviews:", err));
       })
-      .catch((err) => console.log("Error:", err));
+      .catch(err => console.error("Error:", err));
   }, []);
 
-
-  // If not loaded yet
-  if (!profile) {
-    return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
-  }
-
-  // Average rating
-  var averageScore = (
-    reviewsReceived.reduce(function (total, review) {
-      return total + review.rating;
-    }, 0) / reviewsReceived.length
-  ).toFixed(1);
-
-  // Click handlers
-  function handleLogout() {
-  fetch("http://localhost:8000/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  })
-    .then(() => {
-      window.location.href = "/login";
+  const handleLogout = () => {
+    fetch("http://localhost:8000/auth/logout", {
+      method: "POST",
+      credentials: "include",
     })
-    .catch((err) => {
-      console.error("Logout failed:", err);
-    });
-  }
+      .then(() => window.location.href = "/login")
+      .catch(err => console.error("Logout failed:", err));
+  };
 
-  function handleEditPhoto() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.onchange = async function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleEditPhoto = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch("http://localhost:8000/users/student/profile/profile-photo", {
-        method: "PUT",
-        credentials: "include",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setProfile((prev) => ({
-          ...prev,
-          profile_photo_url: data.photo_url,
-        }));
-      } else {
-        console.error("Failed to upload image:", data.detail);
+      try {
+        const res = await fetch("http://localhost:8000/users/student/profile/profile-photo", {
+          method: "PUT",
+          credentials: "include",
+          body: formData,
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setProfile(prev => ({ ...prev, profile_photo_url: data.photo_url }));
+        } else {
+          console.error("Failed to upload image:", data.detail);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
       }
-    } catch (err) {
-      console.error("Upload error:", err);
+    };
+    input.click();
+  };
+
+  const handleUploadCV = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".pdf,.doc,.docx";
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("http://localhost:8000/users/student/profile/cv", {
+          method: "PUT",
+          credentials: "include",
+          body: formData,
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setProfile(prev => ({ ...prev, cv_url: data.cv_url }));
+        } else {
+          console.error("Failed to upload CV:", data.detail);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+      }
+    };
+    input.click();
+  };
+
+  const handleSaveChanges = () => {
+    const updatedData = {
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      city: profile.city,
+      contact_phone: profile.contact_phone,
+      biography: profile.biography,
+      skills: profile.skills,
+      experience: profile.experience,
+    };
+
+    fetch("http://localhost:8000/users/student/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(updatedData),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to update");
+        return res.json();
+      })
+      .then(() => setEditMode(false))
+      .catch(err => console.error("Update failed:", err));
+  };
+
+  if (!profile) return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
+
+  const averageScore = reviewsReceived.length
+    ? (reviewsReceived.reduce((total, r) => total + r.rating, 0) / reviewsReceived.length).toFixed(1)
+    : "0.0";
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case "profile":
+        return <StudentProfileSection
+          profile={profile}
+          setProfile={setProfile}
+          editMode={editMode}
+          setEditMode={setEditMode}
+          handleUploadCV={handleUploadCV}
+          handleSaveChanges={handleSaveChanges}
+        />;
+      case "myReviews":
+        return <StudentReviewsSection reviewsReceived={reviewsReceived} averageScore={averageScore} />;
+      case "reviewsHistory":
+        return <StudentReviewsGivenSection reviewsGiven={reviewsGiven} />;
+      default:
+        return null;
     }
   };
-  input.click();
-  }
-
-  function handleUploadCV() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = ".pdf,.doc,.docx";
-
-  input.onchange = async function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch("http://localhost:8000/users/student/profile/cv", {
-        method: "PUT",
-        credentials: "include",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setProfile((prev) => ({
-          ...prev,
-          cv_url: data.cv_url,
-        }));
-      } else {
-        console.error("Failed to upload CV:", data.detail);
-      }
-    } catch (err) {
-      console.error("Upload error:", err);
-    }
-  };
-
-  input.click();
-  }
-
-
-  function handleSaveChanges() {
-  const updatedData = {
-    first_name: profile.first_name,
-    last_name: profile.last_name,
-    city: profile.city,
-    contact_phone: profile.contact_phone,
-    biography: profile.biography,
-    skills: profile.skills,
-    experience: profile.experience
-  };
-
-  fetch("http://localhost:8000/users/student/profile", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(updatedData),
-  })
-    .then((res) => {
-      if (!res.ok) throw new Error("Failed to update");
-      return res.json();
-    })
-    .then(() => {
-      setEditMode(false);
-    })
-    .catch((err) => {
-      console.error("Update failed:", err);
-    });
-  }
-
-
-function renderSection() {
-  if (activeSection === "profile") {
-    return (
-      <div className={styles.sectionContent}>
-        <h2 className={styles.sectionTitle}>Edit Profile</h2>
-        <div className={styles.profileFormWrapper}>
-          <div className={styles.formGroup}>
-            <label>First Name:</label>
-            <input
-              value={profile.first_name || ""}
-              disabled={!editMode}
-              onChange={(e) =>
-                setProfile((prev) => ({ ...prev, first_name: e.target.value }))
-              }
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Last Name:</label>
-            <input
-              value={profile.last_name || ""}
-              disabled={!editMode}
-              onChange={(e) =>
-                setProfile((prev) => ({ ...prev, last_name: e.target.value }))
-              }
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Email:</label>
-            <input value={profile.email || ""} disabled />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Contact Phone:</label>
-            <input
-              value={profile.contact_phone || ""}
-              disabled={!editMode}
-              onChange={(e) =>
-                setProfile((prev) => ({ ...prev, contact_phone: e.target.value }))
-              }
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>City:</label>
-            <input
-              value={profile.city || ""}
-              disabled={!editMode}
-              onChange={(e) =>
-                setProfile((prev) => ({ ...prev, city: e.target.value }))
-              }
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Biography:</label>
-            <textarea
-              value={profile.biography || ""}
-              rows={3}
-              disabled={!editMode}
-              onChange={(e) =>
-                setProfile((prev) => ({ ...prev, biography: e.target.value }))
-              }
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Skills (comma separated):</label>
-            <input
-              value={profile.skills ? profile.skills.join(", ") : ""}
-              disabled={!editMode}
-              onChange={(e) =>
-                setProfile((prev) => ({
-                  ...prev,
-                  skills: e.target.value.split(",").map((s) => s.trim()),
-                }))
-              }
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Experience:</label>
-            <textarea
-              value={profile.experience || ""}
-              rows={2}
-              disabled={!editMode}
-              onChange={(e) =>
-                setProfile((prev) => ({ ...prev, experience: e.target.value }))
-              }
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>CV / Resume:</label>
-
-            {profile.cv_url ? (
-              <div className={styles.cvRow}>
-                <a
-                  href={`http://localhost:8000${profile.cv_url}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.downloadLink}
-                >
-                  View Uploaded CV
-                </a>
-                <span className={styles.separator}>|</span>
-                <button onClick={handleUploadCV} className={styles.uploadCVButton}>
-                  Upload New
-                </button>
-              </div>
-            ) : (
-              <button onClick={handleUploadCV} className={styles.uploadCVButton}>
-                Upload CV
-              </button>
-            )}
-          </div>
-
-
-
-          <div className={styles.buttonGroup}>
-            <button
-              onClick={
-                editMode
-                  ? handleSaveChanges
-                  : () => setEditMode(true)
-              }
-              className={editMode ? styles.saveButton : styles.editButton}
-            >
-              {editMode ? "Save Changes" : "Edit Profile"}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (activeSection === "myReviews") {
-    return (
-      <div className={styles.sectionContent}>
-        <h2 className={styles.sectionTitle}>Your Rating</h2>
-        <div className={styles.averageScoreDisplay}>
-          {averageScore}/5 <Stars rating={averageScore} />
-        </div>
-        <div className={styles.reviewsList}>
-          {reviewsReceived.map((review, index) => (
-            <ReviewCard key={index} {...review} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeSection === "reviewsHistory") {
-    return (
-      <div className={styles.sectionContent}>
-        <h2 className={styles.sectionTitle}>My Ratings History</h2>
-        <div className={styles.reviewsList}>
-          {myReviews.map((review, index) => (
-            <ReviewCard key={index} {...review} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-}
-
 
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.mobileHeader}>
-        <button
-          className={styles.menuToggleIcon}
-          onClick={function () { setSidebarOpen(!sidebarOpen); }}
-        >
-          {sidebarOpen
-            ? <img src="/favicons/left_arrow_icon.png" alt="Close" width={20} height={20} style={{transform: "translateX(210px)", transition: "transform 0.3s ease"}} />
-            : <img src="/favicons/right_arrow_icon.png" alt="Open" width={24} height={24} style={{transform: "translateX(0px)", transition: "transform 0.3s ease"}}/>
-          }
+        <button className={styles.menuToggleIcon} onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <img
+            src={sidebarOpen ? "/favicons/left_arrow_icon.png" : "/favicons/right_arrow_icon.png"}
+            alt={sidebarOpen ? "Close" : "Open"}
+            width={24}
+            height={24}
+            style={{ transform: sidebarOpen ? "translateX(210px)" : "translateX(0px)", transition: "transform 0.3s ease" }}
+          />
         </button>
       </div>
 
-      <div className={styles.sidebar + (sidebarOpen ? " " + styles.open : "")}>
-        <div className={styles.profilePhotoWrapperSidebar}>
-          {profile.profile_photo_url && profile.profile_photo_url.length > 0
-            ? <img   src={`http://localhost:8000${profile.profile_photo_url}`} alt="Profile" className={styles.profilePhoto} />
-            : <div className={styles.photoPlaceholder}><FiUser size={48} /></div>}
-          <button onClick={handleEditPhoto} className={styles.editPhotoButton}>✏️</button>
-          <div className={styles.profileName}>
-            {profile.first_name} {profile.last_name}
-          </div>
-          <div className={styles.averageScore}>
-            {averageScore}/5 <Stars rating={averageScore} />
-          </div>
-        </div>
-
-        <button onClick={function () {
-          setActiveSection("profile");
-          setSidebarOpen(false);
-          setEditMode(false);
-        }} className={styles.sidebarBtn}>Profile Info</button>
-
-        <button onClick={function () {
-          setActiveSection("myReviews");
-          setSidebarOpen(false);
-          setEditMode(false);
-        }} className={styles.sidebarBtn}>My Reviews</button>
-
-        <button onClick={function () {
-          setActiveSection("reviewsHistory");
-          setSidebarOpen(false);
-          setEditMode(false);
-        }} className={styles.sidebarBtn}>Reviews History</button>
-
-        <button onClick={handleLogout} className={styles.sidebarBtnLogout}>
-          <FiLogOut /> Logout
-        </button>
-      </div>
+      <StudentSidebar
+        profile={profile}
+        averageScore={averageScore}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        setActiveSection={setActiveSection}
+        setEditMode={setEditMode}
+        handleEditPhoto={handleEditPhoto}
+        handleLogout={handleLogout}
+      />
 
       <div className={styles.mainContent}>
         {renderSection()}

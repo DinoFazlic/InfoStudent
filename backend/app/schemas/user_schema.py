@@ -34,7 +34,7 @@ class StudentProfileOut(BaseModel):
     cv_url: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class EmployerProfileOut(BaseModel):
     company_name: Optional[str]
@@ -43,7 +43,7 @@ class EmployerProfileOut(BaseModel):
     website_url: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserRead(BaseModel):
     id: int
@@ -60,7 +60,7 @@ class UserRead(BaseModel):
     employer_profile: Optional[EmployerProfileOut] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UpdateStudentProfileRequest(BaseModel):

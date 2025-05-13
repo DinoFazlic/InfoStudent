@@ -6,6 +6,7 @@ from app.models.users import User
 from app.schemas.user_schema import UpdateStudentProfileRequest, UpdateEmployerProfileRequest
 from app.controllers.profile_controller import update_student_profile_controller, update_employer_profile_controller, update_profile_photo_controller, upload_cv_controller
 
+
 router = APIRouter()
 
 @router.put("/student/profile")
