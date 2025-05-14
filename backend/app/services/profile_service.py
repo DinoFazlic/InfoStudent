@@ -94,3 +94,25 @@ def update_student_cv_service(file: UploadFile, db: Session, current_user: User)
     db.refresh(student_profile)
 
     return {"cv_url": student_profile.cv_url}
+
+SCHEDULE_UPLOAD_FOLDER = "app/static/schedule_uploads"
+
+def update_student_schedule_service(file: UploadFile, db: Session, current_user: User):
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed for schedule")
+
+    if current_user.role != "student":
+        raise HTTPException(status_code=403, detail="Only students can upload schedules")
+
+    filename = save_uploaded_file(file, SCHEDULE_UPLOAD_FOLDER)
+
+    student_profile = current_user.student_profile
+    if not student_profile:
+        raise HTTPException(status_code=404, detail="Student profile not found")
+
+    student_profile.schedule_url = f"/static/schedule_uploads/{filename}"
+    db.add(student_profile)
+    db.commit()
+    db.refresh(student_profile)
+
+    return {"schedule_url": student_profile.schedule_url}

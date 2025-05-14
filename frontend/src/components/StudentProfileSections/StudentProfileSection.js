@@ -1,7 +1,7 @@
 import React from "react";
 import styles from '@/styles/Profile.module.css';
 
-function StudentProfileSection({ profile, setProfile, editMode, setEditMode, handleUploadCV, handleSaveChanges }) {
+function StudentProfileSection({ profile, setProfile, editMode, setEditMode, handleUploadCV, handleSaveChanges, handleUploadSchedule }) {
   return (
     <div className={styles.sectionContent}>
       <h2 className={styles.sectionTitle}>Profile Information</h2>
@@ -49,6 +49,19 @@ function StudentProfileSection({ profile, setProfile, editMode, setEditMode, han
             </div>
           ) : (
             <button onClick={handleUploadCV} className={styles.uploadCVButton}>Upload CV</button>
+          )}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Schedule (PDF):</label>
+          {profile.schedule_url ? (
+            <div className={styles.cvRow}>
+              <a href={`http://localhost:8000${profile.schedule_url}`} target="_blank" rel="noopener noreferrer" className={styles.downloadLink}>View Uploaded Schedule</a>
+              <span className={styles.separator}>|</span>
+              <button onClick={handleUploadSchedule} className={styles.uploadCVButton}>Upload New</button>
+            </div>
+          ) : (
+            <button onClick={handleUploadSchedule} className={styles.uploadCVButton}>Upload Schedule</button>
           )}
         </div>
 

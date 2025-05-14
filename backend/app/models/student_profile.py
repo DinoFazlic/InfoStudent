@@ -10,4 +10,5 @@ class Students(SQLModel, table=True):
     skills: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
     experience: Optional[str]
     cv_url: Optional[str]
+    schedule_url: Optional[str]
     user: Optional[User] = Relationship(back_populates="student_profile")

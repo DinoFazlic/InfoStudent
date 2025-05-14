@@ -4,8 +4,7 @@ from app.database import get_db
 from app.utils.auth import get_current_user
 from app.models.users import User
 from app.schemas.user_schema import UpdateStudentProfileRequest, UpdateEmployerProfileRequest
-from app.controllers.profile_controller import update_student_profile_controller, update_employer_profile_controller, update_profile_photo_controller, upload_cv_controller
-
+from app.controllers.profile_controller import update_profile_photo_controller, update_student_profile_controller, update_employer_profile_controller, upload_cv_controller, upload_schedule_controller
 
 router = APIRouter()
 
@@ -48,3 +47,7 @@ def upload_student_cv(
     current_user: User = Depends(get_current_user),
 ):
     return upload_cv_controller(file, db, current_user)
+
+@router.post("/student/upload-schedule")
+def upload_schedule(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return upload_schedule_controller(file, db, current_user)

@@ -108,6 +108,35 @@ function StudentProfile() {
     input.click();
   };
 
+  const handleUploadSchedule = async () => {
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = ".pdf";
+
+  fileInput.onchange = async () => {
+    if (fileInput.files.length === 0) return;
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const res = await fetch("http://localhost:8000/users/student/upload-schedule", {
+      method: "POST",
+      body: formData,
+      credentials: "include", // if you're using cookie-based auth
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setProfile(prev => ({ ...prev, schedule_url: data.schedule_url }));
+    } else {
+      alert("Failed to upload schedule.");
+    }
+  };
+
+  fileInput.click();
+  };
+
+
   const handleSaveChanges = () => {
     const updatedData = {
       first_name: profile.first_name,
@@ -149,6 +178,7 @@ function StudentProfile() {
           setEditMode={setEditMode}
           handleUploadCV={handleUploadCV}
           handleSaveChanges={handleSaveChanges}
+          handleUploadSchedule={handleUploadSchedule}
         />;
       case "myReviews":
         return <StudentReviewsSection reviewsReceived={reviewsReceived} averageScore={averageScore} />;
