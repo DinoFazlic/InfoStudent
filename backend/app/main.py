@@ -24,6 +24,7 @@ def root():
 
 os.makedirs("app/static/profile_photos", exist_ok=True)
 os.makedirs("app/static/cv_uploads", exist_ok=True)
+os.makedirs("app/static/schedule_uploads", exist_ok=True)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 

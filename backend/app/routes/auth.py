@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, Response, BackgroundTasks
+from fastapi import APIRouter, Depends, Response, BackgroundTasks, status
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas.user_schema import LoginRequest, ResetPasswordRequest, RegisterRequest
+from app.schemas.user_schema import LoginRequest, ResetPasswordRequest, RegisterRequest, LoginResponse, UserRead
 from app.controllers.user_controller import login_controller,register_controller
 from app.controllers.password_controller import forgot_password_controller, reset_password_controller
 
@@ -13,11 +13,9 @@ from fastapi.responses import JSONResponse
 from app.utils.auth import get_current_student, get_current_employer
 
 
-
-
 router = APIRouter()
 
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK,)
 def login(data: LoginRequest, response: Response, db: Session = Depends(get_db)):
     return login_controller(data, response, db)
 

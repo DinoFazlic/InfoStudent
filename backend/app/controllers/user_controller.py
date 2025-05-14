@@ -51,4 +51,4 @@ def login_controller(data: LoginRequest, response: Response, db: Session):
         path="/"
     )
 
-    return {"msg": "Login successful"}
+    return {"user":user}
