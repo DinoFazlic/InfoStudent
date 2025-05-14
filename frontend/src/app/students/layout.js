@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { jwtVerify } from 'jose';
+import Navbar from '@/components/Navbar';
+
 
 const SECRET = process.env.SECRET_KEY;
 
@@ -32,5 +34,10 @@ export default async function StudentsLayout({ children }) {
   }
 
 
-  return <>{children}</>;
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 }

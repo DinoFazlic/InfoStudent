@@ -51,7 +51,13 @@ class UserRead(BaseModel):
     last_name: str
     email: EmailStr
     role: str
+    city: Optional[str]
+    contact_phone: Optional[str]
+    profile_photo_url: Optional[str]
 
+
+    student_profile: Optional[StudentProfileOut] = None
+    employer_profile: Optional[EmployerProfileOut] = None
 
     class Config:
         from_attributes = True

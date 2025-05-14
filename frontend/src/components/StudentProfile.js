@@ -122,7 +122,7 @@ function StudentProfile() {
     const res = await fetch("http://localhost:8000/users/student/upload-schedule", {
       method: "POST",
       body: formData,
-      credentials: "include", // if you're using cookie-based auth
+      credentials: "include",
     });
 
     if (res.ok) {
