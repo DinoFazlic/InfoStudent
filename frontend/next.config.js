@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    /*reactStrictMode: false, //ovo stavit kako se ne bi dvaput pozivali npr "GET /auth/users/me HTTP/1.1"*/
     async rewrites() {
       return [
         {

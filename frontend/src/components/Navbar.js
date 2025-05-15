@@ -45,6 +45,17 @@ export default function Navbar() {
     };
 
     fetchRole();
+
+    const handlePhotoUpdate = (e) => {
+      const updatedUrl = e.detail.url;
+      setProfilePic(`http://localhost:8000${updatedUrl}?t=${Date.now()}`);
+    };
+
+    window.addEventListener("profilePhotoUpdated", handlePhotoUpdate);
+
+    return () => {
+      window.removeEventListener("profilePhotoUpdated", handlePhotoUpdate);
+    };
   }, []);
 
 
@@ -55,8 +66,8 @@ export default function Navbar() {
           <Image
             src="/logo.png"
             alt="Logo"
-            width={40}
-            height={40}
+            width={48}
+            height={48}
             className="object-contain"
           />
           <span className="hidden sm:inline-block font-bold text-xl">
@@ -75,7 +86,7 @@ export default function Navbar() {
                 <img
                   src={profilePic}
                   alt="Profile"
-                  className="w-9 h-9 object-cover rounded-full cursor-pointer border border-gray-300 hover:border-blue-500 transition"
+                  className="w-[45px] h-[45px] aspect-square object-cover rounded-full cursor-pointer border border-gray-300 hover:border-blue-500 transition"               
                 />
               ) : (
                 <div className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 hover:border-blue-500 transition cursor-pointer text-gray-600 bg-gray-100">

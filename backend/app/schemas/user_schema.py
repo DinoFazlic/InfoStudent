@@ -32,6 +32,7 @@ class StudentProfileOut(BaseModel):
     skills: Optional[List[str]]
     experience: Optional[str]
     cv_url: Optional[str]
+    schedule_url: Optional[str] 
 
     class Config:
         from_attributes = True

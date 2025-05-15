@@ -81,6 +81,11 @@ function EmployerProfile() {
             ...prev,
             profile_photo_url: data.photo_url,
           }));
+            window.dispatchEvent(
+            new CustomEvent("profilePhotoUpdated", {
+              detail: { url: data.photo_url },
+            })
+          );
         } else {
           console.error("Failed to upload image:", data.detail);
         }

@@ -16,7 +16,7 @@
 
 .sidebar {
   position: fixed;
-  top: 64px;
+  top: 96px;
   left: 0;
   width: 250px;
   height: 100%;
@@ -25,7 +25,7 @@
   transition: transform 0.3s ease;
   z-index: 1000;
   padding: 25px 20px;
-  padding-bottom: 76px;
+  padding-bottom: 96px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -82,8 +82,8 @@
 }
 
 .profilePhoto {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
   background: #e0e7ff;
@@ -105,8 +105,8 @@
 
 .editPhotoButton {
   position: fixed;
-  top: 100px;
-  right: 75px;
+  top: 120px;
+  right: 68px;
   background: white;
   border: 1px solid #ccc;
   border-radius: 100%;
