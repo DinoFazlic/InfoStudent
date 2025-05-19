@@ -1,320 +1,190 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import styles from '@/styles/Profile.module.css';
-import { FiUser, FiLogOut } from "react-icons/fi";
+import styles from "@/styles/Profile.module.css";
 
-function Stars(props) {
-  const fullStars = Math.round(props.rating);
-  const starsArray = [];
-
-  for (let i = 0; i < 5; i++) {
-    if (i < fullStars) {
-      starsArray.push("★");
-    } else {
-      starsArray.push("☆");
-    }
-  }
-
-  return <span className={styles.stars}>{starsArray.join("")}</span>;
-}
-
-function ReviewCard(props) {
-  return (
-    <div className={styles.reviewCard}>
-      <div className={styles.reviewHeader}>
-        <span className={styles.reviewName}>{props.name}</span>
-        <span className={styles.reviewRating}>{props.rating}/5</span>
-      </div>
-      <textarea className={styles.reviewText} value={props.comment} disabled rows={2} />
-    </div>
-  );
-}
+import EmployerSidebar from "@/components/EmployerProfileSections/EmployerSidebar";
+import EmployerProfileSection from "@/components/EmployerProfileSections/EmployerProfileSection";
+import EmployerReviewsSection from "@/components/EmployerProfileSections/EmployerReviewsSection";
+import EmployerReviewsGivenSection from "@/components/EmployerProfileSections/EmployerReviewsGivenSection";
 
 function EmployerProfile() {
   const [profile, setProfile] = useState(null);
+  const [form, setForm] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [form, setForm] = useState({});
   const [activeSection, setActiveSection] = useState("profile");
 
-  const reviewsReceived = [
-    { name: "Ajla Mustafić", comment: "Lijepa saradnja.", rating: 5 },
-    { name: "Tarik Kovačević", comment: "Brza komunikacija.", rating: 4 },
-    { name: "Lejla Smajić", comment: "Top poslodavac!", rating: 5 }
-  ];
+  const [reviewsReceived, setReviewsReceived] = useState([]);
+  const [reviewsGiven, setReviewsGiven] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:8000/auth/users/me", {
-      credentials: "include"
+      credentials: "include",
     })
       .then((res) => {
-      if (res.status === 401) {
-        window.location.href = "/login"; 
-      }
-      return res.json();
+        if (res.status === 401) window.location.href = "/login";
+        return res.json();
       })
       .then((data) => {
-        const employerData = {
-          ...data,
-          ...data.employer_profile, // spaja user i profil
-        };
+        if (data.role !== "employer") {
+          window.location.href = "/login";
+          return;
+        }
+        const employerData = { ...data, ...data.employer_profile };
         setProfile(employerData);
-        setForm(employerData); // ako koristiš formu
+        setForm(employerData);
+
+        fetch("http://localhost:8000/reviews/received", { credentials: "include" })
+          .then((res) => res.json())
+          .then(setReviewsReceived)
+          .catch(console.error);
+
+        fetch("http://localhost:8000/reviews/given", { credentials: "include" })
+          .then((res) => res.json())
+          .then(setReviewsGiven)
+          .catch(console.error);
       });
   }, []);
 
-  function handleLogout() {
-  fetch("http://localhost:8000/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  })
-    .then(() => {
-      window.location.href = "/login";
+  const handleLogout = () => {
+    fetch("http://localhost:8000/auth/logout", {
+      method: "POST",
+      credentials: "include",
     })
-    .catch((err) => {
-      console.error("Logout failed:", err);
-    });
-  }
-
-  function handleEditPhoto() {
-    alert("Change photo (upload coming soon!)");
-  }
-
-  function handleSaveChanges() {
-  const updatedData = {
-    first_name: form.first_name,
-    last_name: form.last_name,
-    company_name: form.company_name,
-    company_description: form.company_description,
-    address: form.address,
-    website_url: form.website_url,
-    contact_phone: form.contact_phone,
-    city: form.city
+      .then(() => window.location.href = "/login")
+      .catch((err) => console.error("Logout failed:", err));
   };
 
-  fetch("http://localhost:8000/auth/users/me/employer", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(updatedData),
-  })
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error("Failed to update employer profile");
+  const handleEditPhoto = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("http://localhost:8000/users/employer/profile/profile-photo", {
+          method: "PUT",
+          credentials: "include",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          setProfile((prev) => ({
+            ...prev,
+            profile_photo_url: data.photo_url,
+          }));
+            window.dispatchEvent(
+            new CustomEvent("profilePhotoUpdated", {
+              detail: { url: data.photo_url },
+            })
+          );
+        } else {
+          console.error("Failed to upload image:", data.detail);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
       }
-      return res.json();
+    };
+
+    input.click();
+  };
+
+  const handleSaveChanges = () => {
+    const updatedData = {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      company_name: form.company_name,
+      company_description: form.company_description,
+      address: form.address,
+      website_url: form.website_url,
+      contact_phone: form.contact_phone,
+      city: form.city,
+    };
+
+    fetch("http://localhost:8000/users/employer/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(updatedData),
     })
-    .then(() => {
-      setProfile(form);
-      setEditMode(false);
-    })
-    .catch((err) => {
-      console.error("Update failed:", err);
-    });
-  }
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to update employer profile");
+        return res.json();
+      })
+      .then(() => {
+        setProfile(form);
+        setEditMode(false);
+      })
+      .catch((err) => console.error("Update failed:", err));
+  };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-  function handleChange(event) {
-    const name = event.target.name;
-    const value = event.target.value;
+  const averageScore = reviewsReceived.length
+    ? (reviewsReceived.reduce((total, r) => total + r.rating, 0) / reviewsReceived.length).toFixed(1)
+    : "0.0";
 
-    setForm(function (prevForm) {
-      const updatedForm = {};
-      for (const key in prevForm) {
-        updatedForm[key] = prevForm[key];
-      }
-      updatedForm[name] = value;
-      return updatedForm;
-    });
-  }
-
-  function getInitials(first, last) {
-    const firstLetter = first && first.length > 0 ? first[0] : "";
-    const lastLetter = last && last.length > 0 ? last[0] : "";
-    return (firstLetter + lastLetter).toUpperCase();
-  }
-
-  const averageScore = (
-    reviewsReceived.reduce(function (total, review) {
-      return total + review.rating;
-    }, 0) / reviewsReceived.length
-  ).toFixed(1);
-
-  function renderSection() {
-    if (activeSection === "profile") {
-      return (
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>Edit Company Profile</h2>
-          <div className={styles.profileFormWrapper}>
-            <div className={styles.formGroup}>
-              <label>First Name:</label>
-              <input
-                name="first_name"
-                value={form.first_name || ""}
-                onChange={handleChange}
-                disabled={!editMode}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Last Name:</label>
-              <input
-                name="last_name"
-                value={form.last_name || ""}
-                onChange={handleChange}
-                disabled={!editMode}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Company Name:</label>
-              <input
-                name="company_name"
-                value={form.company_name || ""}
-                onChange={handleChange}
-                disabled={!editMode}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Company Description:</label>
-              <textarea
-                name="company_description"
-                value={form.company_description || ""}
-                onChange={handleChange}
-                disabled={!editMode}
-                rows={3}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>City:</label>
-              <input
-                name="city"
-                value={form.city || ""}
-                onChange={handleChange}
-                disabled={!editMode}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Address:</label>
-              <input
-                name="address"
-                value={form.address || ""}
-                onChange={handleChange}
-                disabled={!editMode}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Website URL:</label>
-              <input
-                name="website_url"
-                value={form.website_url || ""}
-                onChange={handleChange}
-                disabled={!editMode}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Contact Number:</label>
-              <input
-                name="contact_phone"
-                value={form.contact_phone || ""}
-                onChange={handleChange}
-                disabled={!editMode}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Email:</label>
-              <input
-                name="email"
-                value={form.email || ""}
-                disabled
-              />
-            </div>
-            <div className={styles.buttonGroup}>
-              <button
-                onClick={editMode ? handleSaveChanges : function () { setEditMode(true); }}
-                className={editMode ? styles.saveButton : styles.editButton}
-              >
-                {editMode ? "Save Changes" : "Edit Profile"}
-              </button>
-            </div>
-          </div>
-        </div>
-      );
+  const renderSection = () => {
+    switch (activeSection) {
+      case "profile":
+        return (
+          <EmployerProfileSection
+            form={form}
+            editMode={editMode}
+            handleChange={handleChange}
+            handleSaveChanges={handleSaveChanges}
+            setEditMode={setEditMode}
+          />
+        );
+      case "reviews":
+        return <EmployerReviewsSection reviewsReceived={reviewsReceived} averageScore={averageScore} />;
+      case "reviewsGiven":
+        return <EmployerReviewsGivenSection reviewsGiven={reviewsGiven} />;
+      default:
+        return null;
     }
+  };
 
-    if (activeSection === "reviews") {
-      return (
-        <div className={styles.sectionContent}>
-          <h2 className={styles.sectionTitle}>Company Reviews</h2>
-          <div className={styles.averageScoreDisplay}>
-            {averageScore}/5 <Stars rating={averageScore} />
-          </div>
-          <div className={styles.reviewsList}>
-            {reviewsReceived.map(function (review, index) {
-              return (
-                <ReviewCard
-                  key={index}
-                  name={review.name}
-                  comment={review.comment}
-                  rating={review.rating}
-                />
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
-
-    return null;
-  }
-
-  if (!profile) {
-    return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
-  }
+  if (!profile) return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
 
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.mobileHeader}>
         <button
           className={styles.menuToggleIcon}
-          onClick={function () { setSidebarOpen(!sidebarOpen); }}
+          onClick={() => setSidebarOpen(!sidebarOpen)}
         >
-          {sidebarOpen
-            ? <img src="/favicons/left_arrow_icon.png" alt="Close" width={20} height={20} style={{ marginLeft: "400px" }} />
-            : <img src="/favicons/right_arrow_icon.png" alt="Open" width={24} height={24} />
-          }
+          <img
+            src={sidebarOpen ? "/favicons/left_arrow_icon.png" : "/favicons/right_arrow_icon.png"}
+            alt={sidebarOpen ? "Close" : "Open"}
+            width={24}
+            height={24}
+            style={{ transform: sidebarOpen ? "translateX(210px)" : "translateX(0px)", transition: "transform 0.3s ease" }}
+          />
         </button>
       </div>
 
-      <div className={styles.sidebar + (sidebarOpen ? " " + styles.open : "")}>
-        <div className={styles.profilePhotoWrapperSidebar}>
-          {profile.profile_photo_url
-            ? <img src={profile.profile_photo_url} alt="Profile" className={styles.profilePhoto} />
-            : <div className={styles.photoPlaceholder}>
-                {getInitials(profile.first_name, profile.last_name) || <FiUser size={48} />}
-              </div>}
-          <button onClick={handleEditPhoto} className={styles.editPhotoButton}>✏️</button>
-          <div className={styles.profileName}>{profile.first_name} {profile.last_name}</div>
-          <div className={styles.averageScore}>{averageScore}/5 <Stars rating={averageScore} /></div>
-        </div>
-
-        <button
-          onClick={function () { setActiveSection("profile"); setSidebarOpen(false); setEditMode(false); }}
-          className={styles.sidebarBtn}
-        >
-          Company Info
-        </button>
-        <button
-          onClick={function () { setActiveSection("reviews"); setSidebarOpen(false); setEditMode(false); }}
-          className={styles.sidebarBtn}
-        >
-          Reviews
-        </button>
-        <button onClick={handleLogout} className={styles.sidebarBtnLogout}>
-          <FiLogOut /> Logout
-        </button>
-      </div>
+      <EmployerSidebar
+        profile={profile}
+        averageScore={averageScore}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        setActiveSection={setActiveSection}
+        setEditMode={setEditMode}
+        handleEditPhoto={handleEditPhoto}
+        handleLogout={handleLogout}
+      />
 
       <div className={styles.mainContent}>
         {renderSection()}
