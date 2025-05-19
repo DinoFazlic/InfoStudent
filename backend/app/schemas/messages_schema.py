@@ -2,12 +2,10 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-# ➕ Sent from frontend
 class MessageCreate(BaseModel):
     receiver_id: int
     content: str
 
-# 👁️ Sent back to frontend
 class MessageRead(BaseModel):
     id: int
     sender_id: int
