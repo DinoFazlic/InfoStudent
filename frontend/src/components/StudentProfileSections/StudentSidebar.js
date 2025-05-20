@@ -10,7 +10,7 @@ function StudentSidebar({ profile, averageScore, sidebarOpen, setSidebarOpen, se
         {profile.profile_photo_url ? (
           <img src={`http://localhost:8000${profile.profile_photo_url}`} alt="Profile" className={styles.profilePhoto} />
         ) : (
-          <div className={styles.photoPlaceholder}><FiUser size={48} /></div>
+          <div className={styles.photoPlaceholder}><FiUser size={55} /></div>
         )}
         <button onClick={handleEditPhoto} className={styles.editPhotoButton}><img src="/favicons/edit_icon.png" alt="Edit" width={13} height={13} /></button>
         <div className={styles.profileName}>{profile.first_name} {profile.last_name}</div>
@@ -20,6 +20,8 @@ function StudentSidebar({ profile, averageScore, sidebarOpen, setSidebarOpen, se
       <button onClick={() => { setActiveSection("profile"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>Profile Information</button>
       <button onClick={() => { setActiveSection("myReviews"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>Reviews</button>
       <button onClick={() => { setActiveSection("reviewsHistory"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>My Reviews History</button>
+      <button onClick={() => { setActiveSection("myInstructionPosts"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>My Posts</button>
+      <button onClick={() => { setActiveSection("myApplications"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>My Applications</button>
 
       <button onClick={handleLogout} className={styles.sidebarBtnLogout}><FiLogOut /> Logout</button>
     </div>

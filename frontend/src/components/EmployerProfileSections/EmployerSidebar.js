@@ -22,6 +22,7 @@ function EmployerSidebar({ profile, averageScore, sidebarOpen, setSidebarOpen, s
       <button onClick={() => { setActiveSection("profile"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>Profile Information</button>
       <button onClick={() => { setActiveSection("reviews"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>Reviews</button>
       <button onClick={() => { setActiveSection("reviewsGiven"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>My Reviews History</button>
+      <button onClick={() => { setActiveSection("posts"); setSidebarOpen(false); setEditMode(false); }} className={styles.sidebarBtn}>My Posts</button>
       <button onClick={handleLogout} className={styles.sidebarBtnLogout}><FiLogOut /> Logout</button>
     </div>
   );

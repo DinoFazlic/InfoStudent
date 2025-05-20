@@ -89,7 +89,7 @@ export default function Navbar() {
                   className="w-[45px] h-[45px] aspect-square object-cover rounded-full cursor-pointer border border-gray-300 hover:border-blue-500 transition"               
                 />
               ) : (
-                <div className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 hover:border-blue-500 transition cursor-pointer text-gray-600 bg-gray-100">
+                <div className="w-[45px] h-[45px] flex items-center justify-center rounded-full border border-gray-300 hover:border-blue-500 transition cursor-pointer text-gray-600 bg-gray-100">
                   <FiUser size={20} />
                 </div>
               )}

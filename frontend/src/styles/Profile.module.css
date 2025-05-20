@@ -24,8 +24,7 @@
   /*box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);*/
   transition: transform 0.3s ease;
   z-index: 1000;
-  padding: 25px 20px;
-  padding-bottom: 96px;
+  padding-left:20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,8 +90,8 @@
 }
 
 .photoPlaceholder {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   display: flex;
@@ -105,7 +104,7 @@
 
 .editPhotoButton {
   position: fixed;
-  top: 120px;
+  top: 96px;
   right: 68px;
   background: white;
   border: 1px solid #ccc;
@@ -185,8 +184,8 @@
   text-align: left;
   font-size: 1.1rem;
   color: #3b82f6;
-  padding: 14px 18px;
-  margin: 8px 0;
+  padding: 10px 18px;
+  margin: 6px 0;
   border-radius: 10px;
   transition: background 0.25s;
   cursor: pointer;
@@ -197,7 +196,6 @@
 }
 
 .sidebarBtnLogout {
-  margin-top: auto;
   color: #ef4444;
   display: flex;
   align-items: center;

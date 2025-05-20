@@ -7,6 +7,9 @@ import StudentSidebar from "@/components/StudentProfileSections/StudentSidebar";
 import StudentProfileSection from "@/components/StudentProfileSections/StudentProfileSection";
 import StudentReviewsSection from "@/components/StudentProfileSections/StudentReviewsSection";
 import StudentReviewsGivenSection from "@/components/StudentProfileSections/StudentReviewsGivenSection";
+import StudentInstructionPostsSection from "@/components/StudentProfileSections/StudentInstructionPostsSection";
+import StudentAppliedPostsSection from "@/components/StudentProfileSections/StudentAppliedPostsSection";
+
 
 function StudentProfile() {
   const [profile, setProfile] = useState(null);
@@ -15,6 +18,17 @@ function StudentProfile() {
   const [editMode, setEditMode] = useState(false);
   const [reviewsReceived, setReviewsReceived] = useState([]);
   const [reviewsGiven, setReviewsGiven] = useState([]);
+  const [instructionPosts, setInstructionPosts] = useState([]);
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [appliedInternships, setAppliedInternships] = useState([]);
+  const [appliedInstructions, setAppliedInstructions] = useState([]);
+  const [dataLoaded, setDataLoaded] = useState({
+    profile: true,
+    myReviews: false,
+    reviewsHistory: false,
+    instructionPosts: false,
+    myApplications: false,
+  });
 
   useEffect(() => {
     fetch("http://localhost:8000/auth/users/me", { credentials: "include" })
@@ -29,17 +43,65 @@ function StudentProfile() {
         }
         const studentData = { ...data, ...data.student_profile };
         setProfile(studentData);
-
-        fetch("http://localhost:8000/reviews/received", { credentials: "include" })
-          .then(res => res.json()).then(setReviewsReceived)
-          .catch(err => console.error("Failed to fetch received reviews:", err));
-
-        fetch("http://localhost:8000/reviews/given", { credentials: "include" })
-          .then(res => res.json()).then(setReviewsGiven)
-          .catch(err => console.error("Failed to fetch given reviews:", err));
       })
       .catch(err => console.error("Error:", err));
   }, []);
+
+  useEffect(() => {
+    if (activeSection === "myReviews" && !dataLoaded.myReviews) {
+      fetch("http://localhost:8000/reviews/received", { credentials: "include" })
+        .then(res => res.json())
+        .then(data => {
+          setReviewsReceived(data);
+          setDataLoaded(prev => ({ ...prev, myReviews: true }));
+        })
+        .catch(err => console.error("Failed to fetch received reviews:", err));
+    }
+
+    if (activeSection === "reviewsHistory" && !dataLoaded.reviewsHistory) {
+      fetch("http://localhost:8000/reviews/given", { credentials: "include" })
+        .then(res => res.json())
+        .then(data => {
+          setReviewsGiven(data);
+          setDataLoaded(prev => ({ ...prev, reviewsHistory: true }));
+        })
+        .catch(err => console.error("Failed to fetch given reviews:", err));
+    }
+  }, [activeSection, dataLoaded]);
+
+  useEffect(() => {
+    if (activeSection === "myInstructionPosts" && !dataLoaded.instructionPosts) {
+      // MOCK: Replace with real API later
+      const mockInstructions = [
+        { id: 1, title: "Math Tutor", description: "Helping with calculus basics." },
+        { id: 2, title: "Physics Help", description: "Newton's laws and energy." },
+      ];
+      setInstructionPosts(mockInstructions);
+      setDataLoaded(prev => ({ ...prev, instructionPosts: true }));
+    }
+
+    if (activeSection === "myApplications" && !dataLoaded.myApplications) {
+      // MOCK: Replace with real API later
+      const mockJobs = [
+        { id: 1, title: "Store Assistant", description: "Part-time help in local shop." },
+      ];
+      const mockInternships = [
+        { id: 2, title: "Web Dev Intern", description: "Frontend work for NGO." },
+      ];
+      const mockInstructions = [
+        { id: 3, title: "Chemistry Sessions", description: "Helping high school students." },
+        { id: 4, title: "Chemistry Sessions", description: "Helping high school students." },
+        { id: 5, title: "Chemistry Sessions", description: "Helping high school students." },
+        { id: 36, title: "Chemistry Sessions", description: "Helping high school students." },
+      ];
+
+      setAppliedJobs(mockJobs);
+      setAppliedInternships(mockInternships);
+      setAppliedInstructions(mockInstructions);
+      setDataLoaded(prev => ({ ...prev, myApplications: true }));
+    }
+  }, [activeSection, dataLoaded]);
+
 
   const handleLogout = () => {
     fetch("http://localhost:8000/auth/logout", {
@@ -112,33 +174,30 @@ function StudentProfile() {
   };
 
   const handleUploadSchedule = async () => {
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.accept = ".pdf";
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".pdf";
+    input.onchange = async () => {
+      if (!input.files.length) return;
 
-  fileInput.onchange = async () => {
-    if (fileInput.files.length === 0) return;
+      const formData = new FormData();
+      formData.append("file", input.files[0]);
 
-    const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
+      const res = await fetch("http://localhost:8000/users/student/upload-schedule", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
 
-    const res = await fetch("http://localhost:8000/users/student/upload-schedule", {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      setProfile(prev => ({ ...prev, schedule_url: data.schedule_url }));
-    } else {
-      alert("Failed to upload schedule.");
-    }
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(prev => ({ ...prev, schedule_url: data.schedule_url }));
+      } else {
+        alert("Failed to upload schedule.");
+      }
+    };
+    input.click();
   };
-
-  fileInput.click();
-  };
-
 
   const handleSaveChanges = () => {
     const updatedData = {
@@ -165,7 +224,13 @@ function StudentProfile() {
       .catch(err => console.error("Update failed:", err));
   };
 
-  if (!profile) return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-white">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   const averageScore = reviewsReceived.length
     ? (reviewsReceived.reduce((total, r) => total + r.rating, 0) / reviewsReceived.length).toFixed(1)
@@ -187,6 +252,15 @@ function StudentProfile() {
         return <StudentReviewsSection reviewsReceived={reviewsReceived} averageScore={averageScore} />;
       case "reviewsHistory":
         return <StudentReviewsGivenSection reviewsGiven={reviewsGiven} />;
+      case "myInstructionPosts":
+        return <StudentInstructionPostsSection posts={instructionPosts} />;
+      case "myApplications":
+        return (
+          <StudentAppliedPostsSection
+            jobs={appliedJobs}
+            internships={appliedInternships}
+            instructions={appliedInstructions}
+          />);
       default:
         return null;
     }

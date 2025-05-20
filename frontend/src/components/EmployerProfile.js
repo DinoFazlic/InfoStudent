@@ -7,6 +7,8 @@ import EmployerSidebar from "@/components/EmployerProfileSections/EmployerSideba
 import EmployerProfileSection from "@/components/EmployerProfileSections/EmployerProfileSection";
 import EmployerReviewsSection from "@/components/EmployerProfileSections/EmployerReviewsSection";
 import EmployerReviewsGivenSection from "@/components/EmployerProfileSections/EmployerReviewsGivenSection";
+import EmployerPostsSection from "@/components/EmployerProfileSections/EmployerPostsSection";
+
 
 function EmployerProfile() {
   const [profile, setProfile] = useState(null);
@@ -14,9 +16,19 @@ function EmployerProfile() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [activeSection, setActiveSection] = useState("profile");
-
   const [reviewsReceived, setReviewsReceived] = useState([]);
   const [reviewsGiven, setReviewsGiven] = useState([]);
+  const [employerPosts, setEmployerPosts] = useState({
+  jobs: [],
+  instructions: [],
+  internships: [],
+  });
+  const [dataLoaded, setDataLoaded] = useState({
+    profile: true,
+    reviews: false,
+    reviewsGiven: false,
+    posts: false
+  });
 
   useEffect(() => {
     fetch("http://localhost:8000/auth/users/me", {
@@ -34,18 +46,59 @@ function EmployerProfile() {
         const employerData = { ...data, ...data.employer_profile };
         setProfile(employerData);
         setForm(employerData);
-
-        fetch("http://localhost:8000/reviews/received", { credentials: "include" })
-          .then((res) => res.json())
-          .then(setReviewsReceived)
-          .catch(console.error);
-
-        fetch("http://localhost:8000/reviews/given", { credentials: "include" })
-          .then((res) => res.json())
-          .then(setReviewsGiven)
-          .catch(console.error);
       });
   }, []);
+
+  useEffect(() => {
+    if (activeSection === "reviews" && !dataLoaded.reviews) {
+      fetch("http://localhost:8000/reviews/received", { credentials: "include" })
+        .then((res) => res.json())
+        .then((data) => {
+          setReviewsReceived(data);
+          setDataLoaded((prev) => ({ ...prev, reviews: true }));
+        })
+        .catch(console.error);
+    }
+
+    if (activeSection === "reviewsGiven" && !dataLoaded.reviewsGiven) {
+      fetch("http://localhost:8000/reviews/given", { credentials: "include" })
+        .then((res) => res.json())
+        .then((data) => {
+          setReviewsGiven(data);
+          setDataLoaded((prev) => ({ ...prev, reviewsGiven: true }));
+        })
+        .catch(console.error);
+    }
+
+    if (activeSection === "posts" && !dataLoaded.posts) {
+    const simulateFetch = (label) =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          resolve([
+            {
+              id: 1,
+              title: `${label} Post 1`,
+              description: `This is a ${label.toLowerCase()} opportunity.`,
+            },
+            {
+              id: 2,
+              title: `${label} Post 2`,
+              description: `Another great ${label.toLowerCase()} post.`,
+            },
+          ]);
+        }, 500);
+      });
+
+    Promise.all([
+      simulateFetch("Job"),
+      simulateFetch("Instruction"),
+      simulateFetch("Internship"),
+    ]).then(([jobs, instructions, internships]) => {
+      setEmployerPosts({ jobs, instructions, internships });
+      setDataLoaded((prev) => ({ ...prev, posts: true }));
+    });
+    }
+  }, [activeSection, dataLoaded]);
 
   const handleLogout = () => {
     fetch("http://localhost:8000/auth/logout", {
@@ -81,11 +134,9 @@ function EmployerProfile() {
             ...prev,
             profile_photo_url: data.photo_url,
           }));
-            window.dispatchEvent(
-            new CustomEvent("profilePhotoUpdated", {
-              detail: { url: data.photo_url },
-            })
-          );
+          window.dispatchEvent(new CustomEvent("profilePhotoUpdated", {
+            detail: { url: data.photo_url },
+          }));
         } else {
           console.error("Failed to upload image:", data.detail);
         }
@@ -151,12 +202,21 @@ function EmployerProfile() {
         return <EmployerReviewsSection reviewsReceived={reviewsReceived} averageScore={averageScore} />;
       case "reviewsGiven":
         return <EmployerReviewsGivenSection reviewsGiven={reviewsGiven} />;
+      case "posts":
+        return <EmployerPostsSection posts={employerPosts} />;
       default:
         return null;
     }
   };
 
-  if (!profile) return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-white">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
 
   return (
     <div className={styles.pageWrapper}>
