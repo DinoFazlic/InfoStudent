@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from fastapi.responses import Response
 from app.schemas.user_schema import RegisterRequest, LoginRequest
@@ -12,9 +12,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-def register_controller(data: RegisterRequest, response: Response, db: Session):
+def register_controller(data: RegisterRequest, response: Response, db: Session, background_tasks: BackgroundTasks):
     try:
-        user = user_service.register_user(data, db)
+        user = user_service.register_user(data, db, background_tasks)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
