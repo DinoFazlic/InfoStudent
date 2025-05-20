@@ -28,8 +28,9 @@ def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
     return reset_password_controller(data, db)
 
 @router.post("/register")
-def register(data: RegisterRequest, response: Response, db: Session = Depends(get_db)):
-    return register_controller(data, response, db)
+def register(data: RegisterRequest, response: Response, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+
+    return register_controller(data, response, db, background_tasks)
 
 @router.get("/users/me", response_model=UserRead)
 def get_logged_in_user(current_user: User = Depends(get_current_user)):

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from sqlmodel import SQLModel
-from app.routes import auth, profile, review_router
+from app.routes import auth, profile, review_router, avatar_test
 from app import models,database
 from app.database import engine
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,4 +33,5 @@ SQLModel.metadata.create_all(bind=engine)
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(profile.router, prefix="/users", tags=["profile"])
 app.include_router(review_router.router)
+app.include_router(avatar_test.router)
 
