@@ -36,14 +36,21 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 SQLModel.metadata.create_all(bind=engine)
 
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
-app.include_router(profile.router, prefix="/users", tags=["profile"])
-app.include_router(messages_controller.router, prefix="/api/messages", tags=["messages"])
-
 active_connections: dict[int, WebSocket] = {}
+
+
 
 @app.websocket("/ws/{user_id}")
 async def ws_route(websocket: WebSocket, user_id: int):
     await websocket_chat(websocket, user_id)
+app.include_router(messages_controller.router, prefix="/api/messages", tags=["messages"])
+
+
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(profile.router, prefix="/users", tags=["profile"])
 app.include_router(review_router.router)
+
+
+
+
 
