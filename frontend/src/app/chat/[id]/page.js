@@ -11,7 +11,13 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
 
-  // 1️⃣ Dohvati korisnika
+  // ✅ 🟢 VALID: hook is called at top level of the component
+  const { sendMessage } = useWebSocket(currentUserId, (data) => {
+    console.log("📥 Primljena poruka:", data);
+    setMessages((prev) => [...prev, data]);
+  });
+
+  // 🔁 Load user on mount
   useEffect(() => {
     axios.get('http://localhost:8000/auth/users/me', { withCredentials: true })
       .then(res => {
@@ -22,7 +28,7 @@ export default function ChatPage() {
       });
   }, []);
 
-  // 2️⃣ Kad imamo usera, učitaj poruke
+  // 💬 Load old messages when user info is ready
   useEffect(() => {
     if (!currentUserId || !otherUserId) return;
     axios.get(`http://localhost:8000/api/messages/chat/${otherUserId}`, {
@@ -36,12 +42,6 @@ export default function ChatPage() {
       });
   }, [currentUserId, otherUserId]);
 
-  // 3️⃣ WebSocket setup
-  const { sendMessage } = useWebSocket(currentUserId, (data) => {
-    setMessages((prev) => [...prev, data]);
-  });
-
-  // 4️⃣ Slanje poruke
   const handleSend = () => {
     if (!input) return;
     sendMessage(otherUserId, input);
