@@ -20,8 +20,8 @@ export default function PostCard({ post }) {
     <article
       className="
         relative overflow-hidden rounded-2xl shadow
-        bg-[url('/post-bg.svg')] bg-cover bg-center
-        text-slate-900
+        bg-[url('/post-bg-invert.svg')] bg-cover 
+        text-slate-800
       "
     >
       {/* gumb za sakrivanje kartice */}
