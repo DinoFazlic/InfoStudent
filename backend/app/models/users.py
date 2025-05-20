@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
+
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -16,3 +17,17 @@ class User(SQLModel, table=True):
 
     student_profile: Optional["Students"] = Relationship(back_populates="user")
     employer_profile: Optional["Employers"] = Relationship(back_populates="user")
+
+    given_reviews: List["Review"] = Relationship(
+        back_populates="reviewer",
+        sa_relationship_kwargs={"foreign_keys": "[Review.reviewer_id]"}
+    )
+    
+    received_reviews: List["Review"] = Relationship(
+        back_populates="reviewee",
+        sa_relationship_kwargs={"foreign_keys": "[Review.reviewee_id]"}
+    )
+
+from .student_profile import Students
+from .employer_profile import Employers
+from .review import Review

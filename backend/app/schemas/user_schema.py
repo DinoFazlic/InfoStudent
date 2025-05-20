@@ -32,9 +32,10 @@ class StudentProfileOut(BaseModel):
     skills: Optional[List[str]]
     experience: Optional[str]
     cv_url: Optional[str]
+    schedule_url: Optional[str] 
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class EmployerProfileOut(BaseModel):
     company_name: Optional[str]
@@ -43,7 +44,7 @@ class EmployerProfileOut(BaseModel):
     website_url: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserRead(BaseModel):
     id: int
@@ -53,12 +54,14 @@ class UserRead(BaseModel):
     role: str
     city: Optional[str]
     contact_phone: Optional[str]
-    
+    profile_photo_url: Optional[str]
+
+
     student_profile: Optional[StudentProfileOut] = None
     employer_profile: Optional[EmployerProfileOut] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UpdateStudentProfileRequest(BaseModel):
@@ -72,7 +75,6 @@ class UpdateStudentProfileRequest(BaseModel):
     biography: Optional[str]
     skills: Optional[List[str]]
     experience: Optional[str]
-    cv_url: Optional[str]
 
     class Config:
         from_attributes = True
@@ -89,6 +91,12 @@ class UpdateEmployerProfileRequest(BaseModel):
     company_description: Optional[str]
     address: Optional[str]
     website_url: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+class LoginResponse(BaseModel):
+    user: UserRead
 
     class Config:
         from_attributes = True
