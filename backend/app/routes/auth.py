@@ -12,6 +12,8 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from app.utils.auth import get_current_student, get_current_employer
 
+from fastapi import HTTPException
+
 
 router = APIRouter()
 
@@ -55,3 +57,10 @@ def logout(response: Response):
     response = JSONResponse(content={"msg": "Logged out"})
     response.delete_cookie(key="access_token")
     return response
+
+@router.get("/users/email/{email}", response_model=UserRead)
+def get_user_by_email(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
