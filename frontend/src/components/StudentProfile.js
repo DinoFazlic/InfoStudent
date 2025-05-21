@@ -71,7 +71,6 @@ function StudentProfile() {
 
   useEffect(() => {
     if (activeSection === "myInstructionPosts" && !dataLoaded.instructionPosts) {
-      // MOCK: Replace with real API later
       const mockInstructions = [
         { id: 1, title: "Math Tutor", description: "Helping with calculus basics." },
         { id: 2, title: "Physics Help", description: "Newton's laws and energy." },
@@ -81,7 +80,6 @@ function StudentProfile() {
     }
 
     if (activeSection === "myApplications" && !dataLoaded.myApplications) {
-      // MOCK: Replace with real API later
       const mockJobs = [
         { id: 1, title: "Store Assistant", description: "Part-time help in local shop." },
       ];
