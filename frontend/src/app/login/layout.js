@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 
 export default function LoginLayout({ children }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col">
       <LandingNavbar />
       <main className="flex-grow">{children}</main>
       <Footer />

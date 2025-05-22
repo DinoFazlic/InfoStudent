@@ -46,49 +46,38 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7fafd] flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-6xl grid gap-10 md:grid-cols-2 items-center">
+    <section
+      className="flex-1 flex items-center justify-center px-10 py-28 relative overflow-hidden"
+      style={{
+        backgroundImage: "url('/backgrounds/post-bg4.svg')",
+        backgroundSize: "cover",
+      }}
+    >
+      <div className="relative z-10 w-full max-w-6xl grid md:grid-cols-2 items-center bg-white/80 rounded-3xl shadow-xl ring-1 p-6 md:p-10 backdrop-blur-md">
         
-        {/* ← LEFT SIDE */}
-        <div className="flex flex-col justify-center items-center md:items-start text-center md:text-left px-6 sm:px-10">
-          {/* logo */}
-          <Image
-            src="/logo.png"
-            width={60}
-            height={60}
-            alt="Logo"
-            className="mb-8"
-          />
-
-          {/* big title */}
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 mb-4">
-            Student
-          </h1>
-
-          {/* bosnian subtitle */}
-          <p className="text-xl text-gray-700 mb-8 leading-relaxed">
-          A platform for discovering <br />
-            jobs, internships <br />
-            and practical opportunities
-          </p>
-
-          {/* illustration with blue block behind */}
-          <div className="relative ml-0 md:ml-12 lg:ml-16">
-           <div className="absolute -left-6 -top-6 w-48 h-48 bg-blue-100 rounded-xl"></div>
+        <div className="flex flex-col justify-center items-center px-4 sm:px-8">
+          <div className="relative -bottom-12  w-50 h-50 z-0">
             <Image
-              src="/illustrations/students_group.png"
-              width={400}
-              height={360}
-              alt="Students illustration"
-              className="relative"
-/>
+              src="/logo.png"
+              alt="Logo"
+              fill
+              className="rounded-xl object-cover"
+            />
           </div>
+
+          <Image
+            src="/illustrations/students_group.png"
+            width={320}
+            height={320}
+            alt="Students illustration"
+            className="rounded-lg relative -top-12 z-1"
+          />
         </div>
 
-        {/* → RIGHT SIDE */}
-        <div className="flex justify-center items-center px-6 sm:px-10">
-          <div className="w-full max-w-sm bg-white rounded-3xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+
+        <div className="flex justify-center items-center py-4 px-4 sm:px-8">
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
               Log in
             </h2>
 
@@ -98,12 +87,10 @@ export default function Login() {
                   {...register("email")}
                   type="email"
                   placeholder="Email"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.email.message}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
                 )}
               </div>
 
@@ -112,44 +99,37 @@ export default function Login() {
                   {...register("password")}
                   type="password"
                   placeholder="Password"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
                 {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.password.message}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
                 )}
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-lg transition duration-200"
               >
                 Log in
               </button>
             </form>
 
             <div className="mt-4 text-sm text-center text-gray-600">
-              <Link
-                href="/forgot-password"
-                className="text-blue-600 hover:underline"
-              >
+              <Link href="/forgot-password" className="text-cyan-700 hover:underline">
                 Forgot password?
               </Link>
             </div>
 
             <div className="mt-2 text-sm text-center text-gray-700">
               Don’t have an account?{" "}
-              <Link
-                href="/register"
-                className="font-semibold text-blue-600 hover:underline"
-              >
+              <Link href="/register" className="font-semibold text-cyan-700 hover:underline">
                 Register
               </Link>
             </div>
           </div>
         </div>
+        
       </div>
-    </div>
+    </section>
   );
 }

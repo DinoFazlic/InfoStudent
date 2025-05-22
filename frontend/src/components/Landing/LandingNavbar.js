@@ -10,7 +10,7 @@ export default function LandingNavbar() {
   const homeHref = "/landing/home";
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-gray-100 shadow-md sticky top-0 z-50">
       <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
         <Link href={homeHref} className="flex items-center space-x-2">
           <Image
@@ -26,7 +26,7 @@ export default function LandingNavbar() {
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6 text-gray-700 font-medium">
+        <div className="hidden  md:flex items-center gap-6 text-gray-700 font-medium">
           <Link href="/landing/jobs" className="nav-link-underline transition">Jobs</Link>
           <Link href="/landing/instructions" className="nav-link-underline transition">Instructions</Link>
           <Link href="/landing/internships" className="nav-link-underline transition">Internships</Link>
@@ -60,7 +60,7 @@ export default function LandingNavbar() {
       </div>
 
       <div
-        className={`md:hidden bg-white border-t border-gray-200 px-4 py-4 flex flex-col gap-4 transition-all duration-300 ease-in-out transform ${
+        className={`md:hidden  bg-gray-100 border-t border-gray-200 px-4 py-4 flex flex-col gap-4 transition-all duration-300 ease-in-out transform ${
           isMenuOpen ? "opacity-100 translate-y-0" : "hidden"
         }`}
       >

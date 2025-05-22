@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { jwtVerify } from 'jose';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 
 const SECRET = process.env.SECRET_KEY;
@@ -38,6 +39,7 @@ export default async function StudentsLayout({ children }) {
     <>
       <Navbar />
       {children}
+      <Footer />
     </>
   );
 }
