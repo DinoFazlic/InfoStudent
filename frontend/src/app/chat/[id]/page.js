@@ -11,13 +11,11 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
 
-  // ✅ 🟢 VALID: hook is called at top level of the component
   const { sendMessage } = useWebSocket(currentUserId, (data) => {
     console.log("📥 Primljena poruka:", data);
     setMessages((prev) => [...prev, data]);
   });
 
-  // 🔁 Load user on mount
   useEffect(() => {
     axios.get('http://localhost:8000/auth/users/me', { withCredentials: true })
       .then(res => {
@@ -28,7 +26,6 @@ export default function ChatPage() {
       });
   }, []);
 
-  // 💬 Load old messages when user info is ready
   useEffect(() => {
     if (!currentUserId || !otherUserId) return;
     axios.get(`http://localhost:8000/api/messages/chat/${otherUserId}`, {
@@ -52,20 +49,53 @@ export default function ChatPage() {
     setInput('');
   };
 
-  if (!currentUserId) return <p>Učitavanje...</p>;
+  if (!currentUserId) return (
+    <div className="flex items-center justify-center h-screen bg-white text-blue-500 text-lg">
+      Učitavanje...
+    </div>
+  );
 
   return (
-    <div>
-      <h2>Chat sa korisnikom {otherUserId}</h2>
-      <div>
-        {messages.map((msg, i) => (
-          <p key={i}>
-            <b>{msg.sender_id === currentUserId ? 'Ja' : 'Oni'}:</b> {msg.content}
-          </p>
-        ))}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="w-full min-h-[80vh] max-h-screen-lg bg-white rounded-xl shadow-md p-6">
+        <h2 className="text-2xl font-semibold text-blue-600 mb-4">
+          Chat sa korisnikom user.id = {otherUserId}
+        </h2>
+
+        <div className="h-96 overflow-y-auto border border-gray-200 min-h-[80vh] rounded-lg p-4 mb-4 bg-gray-50">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`mb-2 p-2 rounded-md text-sm max-w-x break-words max-w-sm whitespace-pre-wraps ${
+                msg.sender_id === currentUserId
+                  ? "ml-auto bg-blue-100 text-blue-800"
+                  : "mr-auto bg-gray-200 text-gray-700"
+              }`}
+            >
+              <span className="block font-medium">
+                {msg.sender_id === currentUserId ? 'Ja' : 'Oni'}
+              </span>
+              {msg.content}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Napiši poruku..."
+            className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            onClick={handleSend}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          >
+            Pošalji
+          </button>
+        </div>
       </div>
-      <input value={input} onChange={(e) => setInput(e.target.value)} />
-      <button onClick={handleSend}>Pošalji</button>
     </div>
   );
 }
