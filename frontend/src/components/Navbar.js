@@ -59,7 +59,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-gray-100 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
         <Link href={homeHref} className="flex items-center space-x-2">
           <Image
@@ -75,7 +75,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center space-x-6 text-sm sm:text-lg font-medium text-gray-700">
+        <div className="flex items-center space-x-6 text-sm sm:text-lg font-medium text-gray-700 ">
           <div className="hidden md:flex space-x-6 items-center">
             <Link href="/chat" className="nav-link-underline transition">Chats</Link>
             <Link href="/jobs" className="nav-link-underline transition">Jobs</Link>
@@ -117,7 +117,7 @@ export default function Navbar() {
       </div>
 
       <div
-        className={`md:hidden bg-white border-t border-gray-200 px-4 py-4 flex flex-col gap-4 transition-all duration-300 ease-in-out transform ${
+        className={`bg-gray-100 md:hidden border-t border-gray-200 px-4 py-4 flex flex-col gap-4 transition-all duration-300 ease-in-out transform ${
           isMenuOpen ? "opacity-100 translate-y-0" : "hidden"
         }`}
       >

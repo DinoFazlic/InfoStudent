@@ -49,7 +49,7 @@ export default function Register() {
         backgroundSize: "cover",
       }}
     >
-      <div className="relative z-10 w-full max-w-6xl grid md:grid-cols-2 items-center bg-white/80 rounded-3xl shadow-xl ring-1 p-6 md:p-10 backdrop-blur-md">
+      <div className="relative z-10 w-full max-w-6xl grid md:grid-cols-2 items-center bg-white/80 rounded-3xl shadow-2xl ring-1 p-6 md:p-10 backdrop-blur-md">
 
         <div className="flex flex-col justify-center items-center px-4 sm:px-8">
           <div className="relative -bottom-12 w-50 h-50 z-0">
@@ -69,9 +69,8 @@ export default function Register() {
           />
         </div>
 
-        {/* RIGHT SIDE: register form */}
         <div className="flex justify-center items-center py-4 px-4 sm:px-8">
-          <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg ring p-6 sm:p-8">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
               Register
             </h2>

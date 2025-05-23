@@ -6,11 +6,11 @@ import Link from "next/link";
 export default function LandingPage() {
   return (
     <div className="flex flex-col items-center">
-      <section className="bg-gradient-to-r bg-gray-100 from-teal-100 to-cyan-100 py-10 sm:px-12 text-center sm:text-left  border-2 border-gray-300 shadow-sm"
+      <section className="bg-gradient-to-r bg-gray-100 from-teal-100 to-cyan-100 sm:px-12 py-20 text-center sm:text-left  border-2 border-gray-300 shadow-sm"
         style={{ backgroundImage: "url('/backgrounds/post-bg4.svg')", backgroundPosition: "center"  }}
       >
-        <div className="max-w mx-auto flex flex-col sm:flex-row items-center justify-between gap-10">
-          <div className="flex-1 space-y-6">
+        <div className="max-w mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+          <div className="flex-1 space-y-6 text-center">
             <h1 className="text-4xl sm:text-5xl font-bold text-black">
               Welcome to InfoStudent
             </h1>
@@ -18,7 +18,7 @@ export default function LandingPage() {
               Connecting students with job, internship, and tutoring opportunities.
               Find flexible work, gain experience, or offer your knowledge — all in one place.
             </p>
-            <div className="flex gap-4 items-center justify-center sm:justify-start">
+            <div className="flex gap-4 items-center justify-center">
               <Link href="/login">
                 <button className="px-6 py-3 bg-cyan-900 text-white rounded hover:bg-cyan-700 transition">
                   Log in
@@ -31,27 +31,44 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
-          <div className="flex-1">
-            <Image
-              src="/illustrations/students_group.png"
-              alt="Students illustration"
-              width={500}
-              height={600}
-              className="h-auto"
-            />
+          <div className="flex flex-col justify-center items-center px-4 sm:px-8">
+            <div className="relative -bottom-16  w-70 h-60 z-0">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                fill
+                className="rounded-xl object-cover"
+              />
+            </div>
+
+            <div className="flex-1">
+              <Image
+                src="/illustrations/students_group.png"
+                alt="Students illustration"
+                width={450}
+                height={600}
+                className="h-auto rounded-lg relative -top-14 z-1"
+              />
+            </div>
           </div>
+
+          
         </div>
       </section>
 
-      <section className="w-full py-16 px-4 sm:px-12 bg-white">
+      <section className="w-full py-35 px-4 sm:px-12 bg-white">
+        <div className="max-w-6xl mx-auto text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-800">Start Exploring Now</h2>
+          <p className="text-gray-600 mt-2">Browse through flexible jobs, internships, and knowledge-sharing opportunities tailored for students.</p>
+        </div>
         <div className="max-w-6xl mx-auto grid gap-8 grid-cols-1 sm:grid-cols-3">
           <FeatureCard title="Jobs" description="Flexible student jobs near you." href="/landing/jobs"/>
-          <FeatureCard title="Instructions" description="Help others and earn by giving lessons."  href="/landing/instructions/"/>
           <FeatureCard title="Internships" description="Gain experience through professional internships."  href="/landing/internships/"/>
+          <FeatureCard title="Instructions" description="Help others and earn by giving lessons."  href="/landing/instructions/"/>
         </div>
       </section>
 
-      <section className="w-full py-16 px-4 sm:px-12 bg-gray-100 border-2 border-gray-300 shadow-sm text-center"
+      <section className="w-full py-25 px-4 sm:px-12 bg-gray-100 border-2 border-gray-300 shadow-sm text-center"
       style={{ backgroundImage: "url('/backgrounds/post-bg4.svg')", backgroundSize: "cover", backgroundRepeat: "no-repeat", backgroundPosition: "center" }}>
         <div className="max-w-3xl mx-auto space-y-6">
           <h2 className="text-3xl font-semibold">About InfoStudent</h2>
@@ -62,7 +79,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="w-full py-20 ">
+      <section className="w-full py-25 ">
         <div className="w-full  bg-gray-100 border-2 border-gray-300 shadow-sm">
           <div
             className="w-full bg-cover bg-center p-8 sm:p-12 backdrop-blur-sm"
