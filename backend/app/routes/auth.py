@@ -30,8 +30,9 @@ def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
     return reset_password_controller(data, db)
 
 @router.post("/register")
-def register(data: RegisterRequest, response: Response, db: Session = Depends(get_db)):
-    return register_controller(data, response, db)
+def register(data: RegisterRequest, response: Response, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+
+    return register_controller(data, response, db, background_tasks)
 
 @router.options("/register")
 def preflight_register_handler():

@@ -13,9 +13,9 @@ export function useWebSocket(userId, onMessage) {
     };
 
     socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    onMessage(data); // šalje poruku u ChatPage
-  };
+      const data = JSON.parse(event.data);
+      onMessage(data);
+    };
 
     socketRef.current = socket;
 

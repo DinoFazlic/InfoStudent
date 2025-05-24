@@ -36,3 +36,5 @@ fastapi
 uvicorn
 python-socketio[asgi]
 fastapi-socketio
+requests>=2.28.0
+
