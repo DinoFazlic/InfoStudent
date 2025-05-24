@@ -40,6 +40,7 @@ def login_controller(data: LoginRequest, response: Response, db: Session):
     }
 
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    print(f"Generated token: {token}")
 
     response.set_cookie(
         key="access_token",
