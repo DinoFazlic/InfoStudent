@@ -49,7 +49,7 @@ export default function Register() {
         backgroundSize: "cover",
       }}
     >
-      <div className="relative z-10 w-full max-w-6xl grid md:grid-cols-2 items-center bg-white/80 rounded-3xl shadow-2xl ring-1 p-6 md:p-10 backdrop-blur-md">
+      <div className="relative z-10 w-full max-w-6xl grid md:grid-cols-2 items-center bg-gray-100 rounded-3xl shadow-2xl ring-1 p-6 md:p-10 backdrop-blur-md">
 
         <div className="flex flex-col justify-center items-center px-4 sm:px-8">
           <div className="relative -bottom-12 w-50 h-50 z-0">
