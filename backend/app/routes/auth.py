@@ -12,6 +12,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from app.utils.auth import get_current_student, get_current_employer
 
+
 from fastapi import HTTPException
 
 
@@ -51,7 +52,12 @@ def get_student_info(current_user: User = Depends(get_current_student)):
 def get_employer_info(current_user: User = Depends(get_current_employer)):
     return current_user
 
-
+@router.get("/users/{user_id}", response_model=UserRead)
+def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 @router.post("/logout")
 def logout(response: Response):
