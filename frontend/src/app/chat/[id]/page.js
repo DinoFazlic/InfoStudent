@@ -26,6 +26,21 @@ export default function ChatPage() {
       });
   }, []);
 
+
+const [otherUsername, setOtherUsername] = useState("");
+
+useEffect(() => {
+  if (!otherUserId) return;
+  axios.get(`http://localhost:8000/auth/users/${otherUserId}`, { withCredentials: true })
+    .then(res => {
+      setOtherUsername(res.data.first_name + " " + res.data.last_name); // ili res.data.full_name
+    })
+    .catch(err => {
+      setOtherUsername(`Korisnik ${otherUserId}`);
+    });
+}, [otherUserId]);
+
+
   useEffect(() => {
     if (!currentUserId || !otherUserId) return;
     axios.get(`http://localhost:8000/api/messages/chat/${otherUserId}`, {
@@ -56,25 +71,22 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    
       <div className="w-full min-h-[80vh] max-h-screen-lg bg-white rounded-xl shadow-md p-6">
-        <h2 className="text-2xl font-semibold text-blue-600 mb-4">
-          Chat sa korisnikom user.id = {otherUserId}
+        <h2 className="text-4xl font-semibold text-blue-600 mb-4">
+          Chat sa {otherUsername}
         </h2>
 
-        <div className="h-96 overflow-y-auto border border-gray-200 min-h-[80vh] rounded-lg p-4 mb-4 bg-gray-50">
+        <div className="h-96 overflow-y-auto border border-blue-400 min-h-[80vh] rounded-lg p-4 mb-4 bg-gray-50 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/backgrounds/chat-bg.png')" }}>
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`mb-2 p-2 rounded-md text-sm max-w-x break-words max-w-sm whitespace-pre-wraps ${
+              className={`mb-3 p-3 rounded-md text-md max-w-x break-words max-w-sm whitespace-pre-wraps ${
                 msg.sender_id === currentUserId
-                  ? "ml-auto bg-blue-100 text-blue-800"
-                  : "mr-auto bg-gray-200 text-gray-700"
+                  ? "ml-auto bg-blue-300 text-blue-950"
+                  : "mr-auto bg-gray-300 text-gray-750"
               }`}
             >
-              <span className="block font-medium">
-                {msg.sender_id === currentUserId ? 'Ja' : 'Oni'}
-              </span>
               {msg.content}
             </div>
           ))}
@@ -86,16 +98,15 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Napiši poruku..."
-            className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 border border-blue-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <button
             onClick={handleSend}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-xl font-bold"
           >
             Pošalji
           </button>
         </div>
       </div>
-    </div>
   );
 }
