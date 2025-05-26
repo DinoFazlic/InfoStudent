@@ -72,7 +72,7 @@ useEffect(() => {
 
   return (
     
-      <div className="w-full min-h-[80vh] max-h-screen-lg bg-white rounded-xl shadow-md p-6">
+      <div className="w-full min-h-[60vh] max-h-screen-lg bg-white rounded-xl shadow-md p-6">
         <h2 className="text-4xl font-semibold text-blue-600 mb-4">
           Chat sa {otherUsername}
         </h2>
