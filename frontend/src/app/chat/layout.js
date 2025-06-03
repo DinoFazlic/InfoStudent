@@ -6,12 +6,10 @@ import Footer from '../../components/Footer'
 export const dynamic = 'force-dynamic'; 
 export default function RootLayout({ children }) {
   return (
-    <html>
       <body>
         <Navbar/>
         {children}
         <Footer/>
       </body>
-    </html>
   );
 }
