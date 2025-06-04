@@ -1,11 +1,12 @@
 import React from "react";
-import styles from "@/styles/Profile.module.css";
 
 export default function StudentInstructionPostsSection({ posts }) {
   return (
-    <div className={styles.sectionContent}>
-      <h2 className={styles.sectionTitle}>My Instruction Posts</h2>
-      <div className={styles.profileFormWrapper}>
+    <div className="bg-gray-100 ring-1 p-[35px] md:p-[45px] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] max-w-[800px] w-full">
+      <h2 className="text-[1.8rem] font-bold text-gray-800 mb-[25px] text-center">
+        My Instruction Posts
+      </h2>
+      <div className="flex flex-col gap-5">
         {posts.length === 0 ? (
           <p className="text-gray-500 text-center mt-4">No instruction posts found.</p>
         ) : (

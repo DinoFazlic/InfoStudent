@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import styles from '@/styles/Profile.module.css';
 
 import StudentSidebar from "@/components/StudentProfileSections/StudentSidebar";
 import StudentProfileSection from "@/components/StudentProfileSections/StudentProfileSection";
@@ -10,9 +9,9 @@ import StudentReviewsGivenSection from "@/components/StudentProfileSections/Stud
 import StudentInstructionPostsSection from "@/components/StudentProfileSections/StudentInstructionPostsSection";
 import StudentAppliedPostsSection from "@/components/StudentProfileSections/StudentAppliedPostsSection";
 
-
 function StudentProfile() {
   const [profile, setProfile] = useState(null);
+  const [backupProfile, setBackupProfile] = useState(null);
   const [activeSection, setActiveSection] = useState("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -32,40 +31,41 @@ function StudentProfile() {
 
   useEffect(() => {
     fetch("http://localhost:8000/auth/users/me", { credentials: "include" })
-      .then(res => {
+      .then((res) => {
         if (res.status === 401) window.location.href = "/login";
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         if (data.role !== "student") {
           window.location.href = "/login";
           return;
         }
         const studentData = { ...data, ...data.student_profile };
         setProfile(studentData);
+        setBackupProfile(studentData);
       })
-      .catch(err => console.error("Error:", err));
+      .catch((err) => console.error("Error:", err));
   }, []);
 
   useEffect(() => {
     if (activeSection === "myReviews" && !dataLoaded.myReviews) {
       fetch("http://localhost:8000/reviews/received", { credentials: "include" })
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           setReviewsReceived(data);
-          setDataLoaded(prev => ({ ...prev, myReviews: true }));
+          setDataLoaded((prev) => ({ ...prev, myReviews: true }));
         })
-        .catch(err => console.error("Failed to fetch received reviews:", err));
+        .catch((err) => console.error("Failed to fetch received reviews:", err));
     }
 
     if (activeSection === "reviewsHistory" && !dataLoaded.reviewsHistory) {
       fetch("http://localhost:8000/reviews/given", { credentials: "include" })
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           setReviewsGiven(data);
-          setDataLoaded(prev => ({ ...prev, reviewsHistory: true }));
+          setDataLoaded((prev) => ({ ...prev, reviewsHistory: true }));
         })
-        .catch(err => console.error("Failed to fetch given reviews:", err));
+        .catch((err) => console.error("Failed to fetch given reviews:", err));
     }
   }, [activeSection, dataLoaded]);
 
@@ -76,7 +76,7 @@ function StudentProfile() {
         { id: 2, title: "Physics Help", description: "Newton's laws and energy." },
       ];
       setInstructionPosts(mockInstructions);
-      setDataLoaded(prev => ({ ...prev, instructionPosts: true }));
+      setDataLoaded((prev) => ({ ...prev, instructionPosts: true }));
     }
 
     if (activeSection === "myApplications" && !dataLoaded.myApplications) {
@@ -96,18 +96,17 @@ function StudentProfile() {
       setAppliedJobs(mockJobs);
       setAppliedInternships(mockInternships);
       setAppliedInstructions(mockInstructions);
-      setDataLoaded(prev => ({ ...prev, myApplications: true }));
+      setDataLoaded((prev) => ({ ...prev, myApplications: true }));
     }
   }, [activeSection, dataLoaded]);
-
 
   const handleLogout = () => {
     fetch("http://localhost:8000/auth/logout", {
       method: "POST",
       credentials: "include",
     })
-      .then(() => window.location.href = "/login")
-      .catch(err => console.error("Logout failed:", err));
+      .then(() => (window.location.href = "/login"))
+      .catch((err) => console.error("Logout failed:", err));
   };
 
   const handleEditPhoto = () => {
@@ -128,10 +127,12 @@ function StudentProfile() {
         });
         const data = await res.json();
         if (res.ok) {
-          setProfile(prev => ({ ...prev, profile_photo_url: data.photo_url }));
-          window.dispatchEvent(new CustomEvent("profilePhotoUpdated", {
-            detail: { url: data.photo_url }
-          }));
+          setProfile((prev) => ({ ...prev, profile_photo_url: data.photo_url }));
+          window.dispatchEvent(
+            new CustomEvent("profilePhotoUpdated", {
+              detail: { url: data.photo_url },
+            })
+          );
         } else {
           console.error("Failed to upload image:", data.detail);
         }
@@ -160,7 +161,7 @@ function StudentProfile() {
         });
         const data = await res.json();
         if (res.ok) {
-          setProfile(prev => ({ ...prev, cv_url: data.cv_url }));
+          setProfile((prev) => ({ ...prev, cv_url: data.cv_url }));
         } else {
           console.error("Failed to upload CV:", data.detail);
         }
@@ -189,13 +190,18 @@ function StudentProfile() {
 
       if (res.ok) {
         const data = await res.json();
-        setProfile(prev => ({ ...prev, schedule_url: data.schedule_url }));
+        setProfile((prev) => ({ ...prev, schedule_url: data.schedule_url }));
       } else {
         alert("Failed to upload schedule.");
       }
     };
     input.click();
   };
+
+    const handleCancelEdit = () => {
+      setProfile(backupProfile);
+      setEditMode(false);      
+    };
 
   const handleSaveChanges = () => {
     const updatedData = {
@@ -214,12 +220,15 @@ function StudentProfile() {
       credentials: "include",
       body: JSON.stringify(updatedData),
     })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error("Failed to update");
         return res.json();
       })
-      .then(() => setEditMode(false))
-      .catch(err => console.error("Update failed:", err));
+      .then((data) => {
+        setEditMode(false);
+        setBackupProfile(profile);
+      })
+      .catch((err) => console.error("Update failed:", err));
   };
 
   if (!profile) {
@@ -231,23 +240,34 @@ function StudentProfile() {
   }
 
   const averageScore = reviewsReceived.length
-    ? (reviewsReceived.reduce((total, r) => total + r.rating, 0) / reviewsReceived.length).toFixed(1)
+    ? (
+        reviewsReceived.reduce((total, r) => total + r.rating, 0) /
+        reviewsReceived.length
+      ).toFixed(1)
     : "0.0";
 
   const renderSection = () => {
     switch (activeSection) {
       case "profile":
-        return <StudentProfileSection
-          profile={profile}
-          setProfile={setProfile}
-          editMode={editMode}
-          setEditMode={setEditMode}
-          handleUploadCV={handleUploadCV}
-          handleSaveChanges={handleSaveChanges}
-          handleUploadSchedule={handleUploadSchedule}
-        />;
+        return (
+          <StudentProfileSection
+            profile={profile}
+            setProfile={setProfile}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            handleUploadCV={handleUploadCV}
+            handleSaveChanges={handleSaveChanges}
+            handleUploadSchedule={handleUploadSchedule}
+            handleCancelEdit={handleCancelEdit}
+          />
+        );
       case "myReviews":
-        return <StudentReviewsSection reviewsReceived={reviewsReceived} averageScore={averageScore} />;
+        return (
+          <StudentReviewsSection
+            reviewsReceived={reviewsReceived}
+            averageScore={averageScore}
+          />
+        );
       case "reviewsHistory":
         return <StudentReviewsGivenSection reviewsGiven={reviewsGiven} />;
       case "myInstructionPosts":
@@ -258,22 +278,33 @@ function StudentProfile() {
             jobs={appliedJobs}
             internships={appliedInternships}
             instructions={appliedInstructions}
-          />);
+          />
+        );
       default:
         return null;
     }
   };
 
   return (
-    <div className={styles.pageWrapper}>
-      <div className={styles.mobileHeader}>
-        <button className={styles.menuToggleIcon} onClick={() => setSidebarOpen(!sidebarOpen)}>
+    <div className="flex min-h-screen bg-gradient-to-br from-[#eef2f7] to-[#d7dde8]" style={{ backgroundImage: "url('/backgrounds/post-bg4.svg')", backgroundPosition: "center" }}>
+      <div className="fixed w-[50px] h-[50px] z-[1200] flex items-center justify-center md:hidden">
+        <button
+          className="top-1/2 fixed"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
           <img
-            src={sidebarOpen ? "/favicons/left_arrow_icon.png" : "/favicons/right_arrow_icon.png"}
+            src={
+              sidebarOpen
+                ? "/favicons/left_arrow_icon.png"
+                : "/favicons/right_arrow_icon.png"
+            }
             alt={sidebarOpen ? "Close" : "Open"}
             width={24}
             height={24}
-            style={{ transform: sidebarOpen ? "translateX(210px)" : "translateX(0px)", transition: "transform 0.3s ease" }}
+            className="transition-transform duration-300"
+            style={{
+              transform: sidebarOpen ? "translateX(210px)" : "translateX(0px)",
+            }}
           />
         </button>
       </div>
@@ -289,7 +320,7 @@ function StudentProfile() {
         handleLogout={handleLogout}
       />
 
-      <div className={styles.mainContent}>
+      <div className="flex-1 p-10 flex justify-center transition-margin-left duration-300 md:ml-[250px]">
         {renderSection()}
       </div>
     </div>

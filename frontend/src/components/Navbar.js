@@ -59,7 +59,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-gray-100 shadow-md sticky top-0 z-50">
+    <nav className="bg-gray-200  h-[96px] sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
         <Link href={homeHref} className="flex items-center space-x-2">
           <Image
@@ -100,7 +100,7 @@ export default function Navbar() {
           )}
 
           <button
-            className="md:hidden text-gray-700 focus:outline-none"
+            className="md:hidden text-gray-700 focus:outline-none duration-300 ease-in-out transform hover:scale-110"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg
@@ -117,7 +117,7 @@ export default function Navbar() {
       </div>
 
       <div
-        className={`bg-gray-100 md:hidden border-t border-gray-200 px-4 py-4 flex flex-col gap-4 transition-all duration-300 ease-in-out transform ${
+        className={`bg-gray-200 md:hidden border-t border-gray-200 px-4 py-4 flex flex-col gap-4 transition-all duration-300 ease-in-out transform ${
           isMenuOpen ? "opacity-100 translate-y-0" : "hidden"
         }`}
       >

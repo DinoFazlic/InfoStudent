@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import styles from "@/styles/Profile.module.css";
 
 import EmployerSidebar from "@/components/EmployerProfileSections/EmployerSidebar";
 import EmployerProfileSection from "@/components/EmployerProfileSections/EmployerProfileSection";
@@ -9,25 +8,25 @@ import EmployerReviewsSection from "@/components/EmployerProfileSections/Employe
 import EmployerReviewsGivenSection from "@/components/EmployerProfileSections/EmployerReviewsGivenSection";
 import EmployerPostsSection from "@/components/EmployerProfileSections/EmployerPostsSection";
 
-
 function EmployerProfile() {
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({});
+  const [backupForm, setBackupForm] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [activeSection, setActiveSection] = useState("profile");
   const [reviewsReceived, setReviewsReceived] = useState([]);
   const [reviewsGiven, setReviewsGiven] = useState([]);
   const [employerPosts, setEmployerPosts] = useState({
-  jobs: [],
-  instructions: [],
-  internships: [],
+    jobs: [],
+    instructions: [],
+    internships: [],
   });
   const [dataLoaded, setDataLoaded] = useState({
     profile: true,
     reviews: false,
     reviewsGiven: false,
-    posts: false
+    posts: false,
   });
 
   useEffect(() => {
@@ -46,6 +45,7 @@ function EmployerProfile() {
         const employerData = { ...data, ...data.employer_profile };
         setProfile(employerData);
         setForm(employerData);
+        setBackupForm(employerData);
       });
   }, []);
 
@@ -71,32 +71,32 @@ function EmployerProfile() {
     }
 
     if (activeSection === "posts" && !dataLoaded.posts) {
-    const simulateFetch = (label) =>
-      new Promise((resolve) => {
-        setTimeout(() => {
-          resolve([
-            {
-              id: 1,
-              title: `${label} Post 1`,
-              description: `This is a ${label.toLowerCase()} opportunity.`,
-            },
-            {
-              id: 2,
-              title: `${label} Post 2`,
-              description: `Another great ${label.toLowerCase()} post.`,
-            },
-          ]);
-        }, 500);
-      });
+      const simulateFetch = (label) =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve([
+              {
+                id: 1,
+                title: `${label} Post 1`,
+                description: `This is a ${label.toLowerCase()} opportunity.`,
+              },
+              {
+                id: 2,
+                title: `${label} Post 2`,
+                description: `Another great ${label.toLowerCase()} post.`,
+              },
+            ]);
+          }, 500);
+        });
 
-    Promise.all([
-      simulateFetch("Job"),
-      simulateFetch("Instruction"),
-      simulateFetch("Internship"),
-    ]).then(([jobs, instructions, internships]) => {
-      setEmployerPosts({ jobs, instructions, internships });
-      setDataLoaded((prev) => ({ ...prev, posts: true }));
-    });
+      Promise.all([
+        simulateFetch("Job"),
+        simulateFetch("Instruction"),
+        simulateFetch("Internship"),
+      ]).then(([jobs, instructions, internships]) => {
+        setEmployerPosts({ jobs, instructions, internships });
+        setDataLoaded((prev) => ({ ...prev, posts: true }));
+      });
     }
   }, [activeSection, dataLoaded]);
 
@@ -105,7 +105,7 @@ function EmployerProfile() {
       method: "POST",
       credentials: "include",
     })
-      .then(() => window.location.href = "/login")
+      .then(() => (window.location.href = "/login"))
       .catch((err) => console.error("Logout failed:", err));
   };
 
@@ -134,9 +134,11 @@ function EmployerProfile() {
             ...prev,
             profile_photo_url: data.photo_url,
           }));
-          window.dispatchEvent(new CustomEvent("profilePhotoUpdated", {
-            detail: { url: data.photo_url },
-          }));
+          window.dispatchEvent(
+            new CustomEvent("profilePhotoUpdated", {
+              detail: { url: data.photo_url },
+            })
+          );
         } else {
           console.error("Failed to upload image:", data.detail);
         }
@@ -146,6 +148,11 @@ function EmployerProfile() {
     };
 
     input.click();
+  };
+
+  const handleCancelEdit = () => {
+    setForm(backupForm); 
+    setEditMode(false);
   };
 
   const handleSaveChanges = () => {
@@ -172,6 +179,7 @@ function EmployerProfile() {
       })
       .then(() => {
         setProfile(form);
+        setBackupForm(form); 
         setEditMode(false);
       })
       .catch((err) => console.error("Update failed:", err));
@@ -183,7 +191,10 @@ function EmployerProfile() {
   };
 
   const averageScore = reviewsReceived.length
-    ? (reviewsReceived.reduce((total, r) => total + r.rating, 0) / reviewsReceived.length).toFixed(1)
+    ? (
+        reviewsReceived.reduce((total, r) => total + r.rating, 0) /
+        reviewsReceived.length
+      ).toFixed(1)
     : "0.0";
 
   const renderSection = () => {
@@ -195,11 +206,17 @@ function EmployerProfile() {
             editMode={editMode}
             handleChange={handleChange}
             handleSaveChanges={handleSaveChanges}
+            handleCancelEdit={handleCancelEdit}
             setEditMode={setEditMode}
           />
         );
       case "reviews":
-        return <EmployerReviewsSection reviewsReceived={reviewsReceived} averageScore={averageScore} />;
+        return (
+          <EmployerReviewsSection
+            reviewsReceived={reviewsReceived}
+            averageScore={averageScore}
+          />
+        );
       case "reviewsGiven":
         return <EmployerReviewsGivenSection reviewsGiven={reviewsGiven} />;
       case "posts":
@@ -217,12 +234,11 @@ function EmployerProfile() {
     );
   }
 
-
   return (
-    <div className={styles.pageWrapper}>
-      <div className={styles.mobileHeader}>
+    <div className="flex min-h-screen bg-gradient-to-br from-[#eef2f7] to-[#d7dde8]" style={{ backgroundImage: "url('/backgrounds/post-bg4.svg')", backgroundPosition: "center" }}>
+      <div className="fixed w-[50px] h-[50px] z-[1200] flex items-center justify-center md:hidden">
         <button
-          className={styles.menuToggleIcon}
+          className="top-1/2 fixed"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
           <img
@@ -230,7 +246,10 @@ function EmployerProfile() {
             alt={sidebarOpen ? "Close" : "Open"}
             width={24}
             height={24}
-            style={{ transform: sidebarOpen ? "translateX(210px)" : "translateX(0px)", transition: "transform 0.3s ease" }}
+            className="transition-transform duration-300"
+            style={{
+              transform: sidebarOpen ? "translateX(210px)" : "translateX(0px)",
+            }}
           />
         </button>
       </div>
@@ -246,7 +265,7 @@ function EmployerProfile() {
         handleLogout={handleLogout}
       />
 
-      <div className={styles.mainContent}>
+      <div className="flex-1 p-10 flex justify-center transition-margin-left duration-300 md:ml-[250px]">
         {renderSection()}
       </div>
     </div>

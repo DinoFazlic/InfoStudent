@@ -109,7 +109,7 @@ export default function HomePageLayout() {
               />
               <button
                 type="submit"
-                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-lg shadow-md transition duration-200"
+                className="cursor-pointer w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-lg shadow-md transition duration-200"
               >
                 Send Message
               </button>

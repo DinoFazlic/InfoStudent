@@ -2,10 +2,10 @@
 
 export default function Footer() {
   return (
-    <footer className="relative z-[1100] w-full bg-gray-100 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 py-6 flex flex-row flex-wrap items-center justify-between text-sm text-gray-600 gap-4">
+    <footer className="relative z-[1100] w-full h-[70px] bg-gray-200">
+      <div className="h-full max-w-7xl mx-auto px-4 py-6 flex flex-row flex-wrap items-center justify-between text-sm text-gray-600 gap-4">
         <div className="mb-4 sm:mb-0">
-          © 2025 InfoStudent. All rights reserved.
+          © 2025 InfoStudent.
         </div>
 
         <div className="flex gap-6">

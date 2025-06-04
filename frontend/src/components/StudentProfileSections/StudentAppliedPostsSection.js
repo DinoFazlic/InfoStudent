@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import styles from "@/styles/Profile.module.css";
 
 export default function StudentAppliedPostsSection({ jobs, internships, instructions }) {
   const [activeType, setActiveType] = useState("jobs");
@@ -15,9 +14,11 @@ export default function StudentAppliedPostsSection({ jobs, internships, instruct
     }`;
 
   return (
-    <div className={styles.sectionContent}>
-      <h2 className={styles.sectionTitle}>My Applications</h2>
-      <div className={styles.profileFormWrapper}>
+    <div className="bg-gray-100 ring-1 p-[35px] md:p-[45px] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] max-w-[800px] w-full">
+      <h2 className="text-[1.8rem] font-bold text-gray-800 mb-[25px] text-center">
+        My Applications
+      </h2>
+      <div className="flex flex-col gap-5">
         <div className="flex justify-center space-x-6 border-b border-gray-200 mb-6">
           {["jobs", "internships", "instructions"].map((type) => (
             <div

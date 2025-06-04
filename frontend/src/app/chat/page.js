@@ -31,23 +31,23 @@ export default function ChatContactsPage() {
       })
       .catch(err => {
         console.error(err);
-        setError('Korisnik sa tom email adresom ne postoji.');
+        setError('User with that email address does not exist.');
       });
   };
 
-  return (
-    <div className="min-h-screen w-full bg-blue-50 py-12 px-4 sm:px-8">
-      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-3xl p-10">
-        <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Kontakti</h1>
-        <p className="text-gray-500 mb-8">Izaberi kontakt za nastavak razgovora ili započni novi.</p>
+ return (
+    <div className="min-h-screen w-full py-12 px-4 sm:px-8" style={{ backgroundImage: "url('/backgrounds/post-bg4.svg')", backgroundPosition: "center" }}>
+      <div className="max-w-7xl mx-auto bg-gray-100 ring-1 shadow-lg rounded-3xl p-10">
+        <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Contacts</h1>
+        <p className="text-gray-500 mb-8">Choose a contact to continue the conversation or start a new one.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-[40%_60%] gap-10">
-          {/* Lista kontakata */}
+          {/* Contact list */}
           <div>
             <ul className="space-y-5">
               {contacts.slice(0, 6).map((c) => (
                 <Link href={`/chat/${c.id}`} key={c.id}>
-                  <div className="flex items-center gap-4 p-4 bg-gray-100 rounded-lg mb-6 hover:bg-gray-200 transition cursor-pointer shadow-sm">
+                  <div className="flex items-center gap-4 p-4 bg-gray-100 ring-1 rounded-lg mb-6 hover:bg-gray-200 transition cursor-pointer shadow-sm">
                     <HiOutlineMail className="text-blue-600 text-xl" />
                     <span className="text-gray-800 font-medium">{c.email}</span>
                   </div>
@@ -56,29 +56,29 @@ export default function ChatContactsPage() {
             </ul>
           </div>
 
-          {/* Forma + ilustracija */}
+          {/* Form + illustration */}
           <div className='p-2'>
             <div className="h-92 rounded-2xl overflow-hidden">
               <img
                 src="/illustrations/chaticon.PNG"
-                alt="Student illustration"
+                alt="Chat illustration"
                 className="h-full w-full object-contain"
               />
             </div>
 
-            <h3 className="text-xl font-semibold text-blue-700 mb-4">Nova poruka</h3>
+            <h3 className="text-xl font-semibold text-blue-700 mb-4">New Message</h3>
             <input
               type="email"
-              placeholder="Unesi email"
+              placeholder="Enter email"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+              className="w-full bg-gray-100 flex-1 border border-black rounded-md px-4 mb-3 py-2"
+            /> 
             <button
               onClick={handleStartChat}
               className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition"
             >
-              Započni
+              Start
             </button>
             {error && <p className="text-red-500 mt-3 text-sm">{error}</p>}
           </div>

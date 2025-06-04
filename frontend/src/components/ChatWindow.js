@@ -46,7 +46,7 @@ useEffect(() => {
     content: input,
   };
 
-  console.log("📤 Sending message:", message); // ADD THIS
+  console.log("📤 Sending message:", message);
 
   socket.emit("send_message", message);
   setMessages((prev) => [...prev, message]);
@@ -78,11 +78,11 @@ useEffect(() => {
 
         <form
         onSubmit={(e) => {
-          e.preventDefault(); // prevent page reload
+          e.preventDefault();
           handleSend();
         }}
         className="mt-4 flex"
-      >
+        >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -94,8 +94,8 @@ useEffect(() => {
           className="bg-blue-500 text-white px-4 rounded-r"
         >
           Send
-  </button>
-</form>
+          </button>
+        </form>
 
       </div>
     </div>

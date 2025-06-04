@@ -1,14 +1,18 @@
 import React from "react";
-import styles from '@/styles/Profile.module.css';
 
 function ReviewCard({ name, rating, comment }) {
   return (
-    <div className={styles.reviewCard}>
-      <div className={styles.reviewHeader}>
-        <span className={styles.reviewName}>{name}</span>
-        <span className={styles.reviewRating}>{rating}/5</span>
+    <div className="w-[90%] max-w-[500px] bg-gray-50 rounded-xl p-4 mb-4 shadow-[0_4px_12px_rgba(50,90,140,0.07)]">
+      <div className="flex justify-between mb-2">
+        <span className="font-semibold text-blue-500">{name}</span>
+        <span className="font-bold text-blue-500">{rating}/5</span>
       </div>
-      <textarea className={styles.reviewText} value={comment} disabled rows={2} />
+      <textarea
+        className="w-full bg-transparent border-none text-gray-700 text-base resize-none"
+        value={comment}
+        disabled
+        rows={2}
+      />
     </div>
   );
 }
