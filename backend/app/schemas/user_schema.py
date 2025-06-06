@@ -1,6 +1,9 @@
 from pydantic import BaseModel, EmailStr, constr
 from typing import Literal, Optional, List
 
+
+
+
 class RegisterRequest(BaseModel):
     first_name: str
     last_name: str
@@ -32,7 +35,7 @@ class StudentProfileOut(BaseModel):
     skills: Optional[List[str]]
     experience: Optional[str]
     cv_url: Optional[str]
-    schedule_url: Optional[str] 
+    #schedule_url: Optional[str] 
 
     class Config:
         from_attributes = True

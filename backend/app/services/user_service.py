@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from app.schemas.user_schema import RegisterRequest
 from app.models.users import User
 from app.repositories import user_repository
-from app.models.student_profile import Students
-from app.models.employer_profile import Employers
+from app.models.student_profile import StudentProfile
+from app.models.employer_profile import EmployerProfile
 from passlib.context import CryptContext
 from fastapi import HTTPException, BackgroundTasks
 from app.services.avatar_service import generate_avatar_prompt
@@ -35,7 +35,7 @@ def register_user(data: RegisterRequest, db: Session, background_tasks: Backgrou
     background_tasks.add_task(generate_and_save_avatar, db_user.id, db_user.first_name or "student", db)
 
     if data.role == "student":
-        student_profile = Students(
+        student_profile = StudentProfile(
             user_id=db_user.id,
             biography=data.biography,
             skills=data.skills,
@@ -45,7 +45,7 @@ def register_user(data: RegisterRequest, db: Session, background_tasks: Backgrou
         db.add(student_profile)
 
     elif data.role == "employer":
-        employer_profile = Employers(
+        employer_profile = EmployerProfile(
             user_id=db_user.id,
             company_name=data.company_name,
             company_description=data.company_description,

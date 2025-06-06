@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 from app.controllers import messages_controller
 from app.websocket.chat_socket import websocket_chat
+from app.routes import instruction_router
 
 app = FastAPI()
 
@@ -50,7 +51,7 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(profile.router, prefix="/users", tags=["profile"])
 app.include_router(review_router.router)
 app.include_router(avatar_test.router)
-
+app.include_router(instruction_router.router) 
 
 
 
