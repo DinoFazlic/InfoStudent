@@ -1,33 +1,101 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional
+# backend/app/models/job.py
+
+import enum
 from datetime import date, datetime, time
+from typing import Optional, List
+# … postojeći importi …
+from sqlalchemy import DateTime, func, ForeignKey, Enum as SQLEnum   #  ✅  ovo dodati
+
+from sqlmodel import SQLModel, Field, Relationship, Column
+
+
 from .users import User
 
+class ApplicationStatus(str, enum.Enum):
+    pending = "pending"
+    accepted = "accepted"
+    rejected = "rejected"
+
+
 class Job(SQLModel, table=True):
+    __tablename__ = "jobs"                      # ← plural, da se poklapa sa SQL
+
     id: Optional[int] = Field(default=None, primary_key=True)
-    created_by: int = Field(foreign_key="user.id")
+
+    created_by: int = Field(
+        sa_column=Column(ForeignKey("users.id", ondelete="CASCADE"))
+    )
+
     title: str
     description: str
-    location: Optional[str]
-    capacity: int = 20
-    price: Optional[float]
-    application_deadline: Optional[date]
-    start_date: Optional[date]
-    end_date: Optional[date]
-    contact_info: Optional[str]
-    created_at: Optional[datetime] = Field(default=None)
-    updated_at: Optional[datetime] = Field(default=None)
+    location: Optional[str] = None
+    capacity: int = Field(default=20)
+    price: Optional[float] = None
+    application_deadline: Optional[date] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    contact_info: Optional[str] = None
 
-class Job_Schedule(SQLModel, table=True):
+    created_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )
+    updated_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            server_default=func.now(),
+            onupdate=func.now(),
+        )
+    )
+
+    owner: Optional[User] = Relationship(back_populates="jobs")
+
+    schedules: List["JobSchedule"] = Relationship(
+        back_populates="job",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
+    applications: List["JobApplication"] = Relationship(
+        back_populates="job",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
+
+
+class JobSchedule(SQLModel, table=True):
+    __tablename__ = "job_schedules"            # ← plural
+
     id: Optional[int] = Field(default=None, primary_key=True)
-    job_id: int = Field(foreign_key="job.id")
+
+    job_id: int = Field(
+        sa_column=Column(ForeignKey("jobs.id", ondelete="CASCADE"))
+    )
     day: str
     start_time: time
     end_time: time
 
-class Job_Application(SQLModel, table=True):
+    job: Optional[Job] = Relationship(back_populates="schedules")
+
+
+class JobApplication(SQLModel, table=True):
+    __tablename__ = "job_applications"         # ← plural
+
     id: Optional[int] = Field(default=None, primary_key=True)
-    job_id: int = Field(foreign_key="job.id")
-    student_id: int = Field(foreign_key="user.id")
-    applied_at: Optional[datetime] = Field(default=None)
-    status: str = Field(default="pending")
+
+    job_id: int = Field(
+        sa_column=Column(ForeignKey("jobs.id", ondelete="CASCADE"))
+    )
+    student_id: int = Field(
+        sa_column=Column(ForeignKey("users.id", ondelete="CASCADE"))
+    )
+
+    applied_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )
+    status: ApplicationStatus = Field(
+        sa_column=Column(
+            SQLEnum(ApplicationStatus, name="job_application_status_enum"),
+            default=ApplicationStatus.pending,
+            server_default=ApplicationStatus.pending.value,
+        )
+    )
+
+    job: Optional[Job] = Relationship(back_populates="applications")
+    student: Optional[User] = Relationship(back_populates="job_applications")

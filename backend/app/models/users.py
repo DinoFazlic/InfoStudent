@@ -1,9 +1,14 @@
+# backend/app/models/users.py
+
 from datetime import datetime
 from typing import List, Optional
+
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Column, DateTime, func
+
 
 class User(SQLModel, table=True):
-    __tablename__ = "users"                     # ← obavezno
+    __tablename__ = "users"
 
     id: Optional[int] = Field(default=None, primary_key=True)
     first_name: Optional[str]
@@ -13,16 +18,21 @@ class User(SQLModel, table=True):
     contact_phone: Optional[str]
     password_hash: str
     role: Optional[str]
-    created_at: Optional[datetime] = None
-    profile_photo_url: Optional[str]
 
-      # ================== RELATIONS ==================
-    student_profile: Optional["StudentProfile"] = Relationship(
-    back_populates="user",
-    sa_relationship_kwargs={"uselist": False},
+    created_at: Optional[datetime] = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
     )
 
-    employer_profile: Optional["EmployerProfile"] = Relationship(   # ← isto ime
+    profile_photo_url: Optional[str]
+    cv_url: Optional[str]  # URL na PDF/CV
+
+    # ================== RELACIJE ==================
+    student_profile: Optional["StudentProfile"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"uselist": False},
+    )
+
+    employer_profile: Optional["EmployerProfile"] = Relationship(
         back_populates="user",
         sa_relationship_kwargs={"uselist": False},
     )
@@ -38,8 +48,25 @@ class User(SQLModel, table=True):
 
     instructions: List["Instruction"] = Relationship(back_populates="author")
 
-# --- lazy imports (NA DNU fajla) -----------------------------------------
-from .student_profile import StudentProfile            # ③ promijenjeno
-from .employer_profile import EmployerProfile          # ④ promijenjeno ako treba
+    jobs: List["Job"] = Relationship(back_populates="owner")
+    internships: List["Internship"] = Relationship(back_populates="owner")
+    job_applications: List["JobApplication"] = Relationship(back_populates="student")
+    internship_applications: List["InternshipApplication"] = Relationship(
+        back_populates="student"
+    )
+
+    # Napomena: relaciju prema OfferInterest više nemamo, jer fajl 'offer_interest.py' ne postoji.
+
+
+# ────────────────────────────────────────────────────────────────────────────────
+#  Lazy importi (postojeći modeli iz istog foldera)
+# ────────────────────────────────────────────────────────────────────────────────
+from .student_profile import StudentProfile
+from .employer_profile import EmployerProfile
 from .review import Review
 from .instruction import Instruction
+from .job import Job, JobSchedule
+
+from .internship import Internship, InternshipApplication
+# Ako u budućnosti implementirate OfferInterest, dodajte ga ovdje:
+# from .offer_interest import OfferInterest

@@ -1,214 +1,150 @@
-// src/app/instructions/page.jsx
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import NavBar from "@/components/NavBar";
+import NavBar from "@/components/Navbar";
 import InstructionCard from "@/components/InstructionCard";
-import { listInstructions, createInstruction } from "@/utils/api/instructions";
+import {
+  listInstructions,
+  createInstruction,
+} from "@/utils/api/instructions";
 
 export default function InstructionsPage() {
-  const [instructions, setInstructions] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Za modal
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    hourly_rate: "",
-    contact_info: "",
-    subject: "",
+  /* state */
+  const [rows,      setRows]   = useState([]);
+  const [loading,   setLoad]   = useState(true);
+  const [showModal, setModal]  = useState(false);
+  const [saving,    setSave]   = useState(false);
+  const [form, setForm] = useState({
+    title: "", subject: "", description: "",
+    hourly_rate: "", contact_info: "",
   });
-  const [saving, setSaving] = useState(false);
 
-  // Kad se komponenta mounta, dohvatimo sve instrukcije
+  /* initial fetch */
   useEffect(() => {
-    async function fetchAll() {
-      try {
-        const data = await listInstructions();
-        setInstructions(data);
-      } catch (err) {
-        console.error("Greška pri dohvaćanju instrukcija:", err);
-        // Možeš htjeti pokazati neki toast ili alert
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchAll();
+    (async () => {
+      try { setRows(await listInstructions()); }
+      catch (e) { console.error(e); }
+      finally { setLoad(false); }
+    })();
   }, []);
 
-  // Handler za otvaranje modala
-  function onOpenModal() {
-    setFormData({
-      title: "",
-      description: "",
-      hourly_rate: "",
-      contact_info: "",
-      subject: "",
-    });
-    setShowModal(true);
-  }
+  /* handlers */
+  const onField = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Handler za submit forme
   async function onSubmit(e) {
     e.preventDefault();
-    setSaving(true);
+    setSave(true);
     try {
-      // Pošalji backendu
-      const payload = {
-        title: formData.title,
-        description: formData.description,
-        hourly_rate: formData.hourly_rate
-          ? Number(formData.hourly_rate)
-          : undefined,
-        contact_info: formData.contact_info || undefined,
-        subject: formData.subject || undefined,
-      };
-      const newInst = await createInstruction(payload);
-      // Dodaj u stanje
-      setInstructions((prev) => [newInst, ...prev]);
-      setShowModal(false);
+      /* payload cleanup */
+      const p = { ...form };
+      if (p.hourly_rate === "")   delete p.hourly_rate;
+      if (p.contact_info === "")  delete p.contact_info;
+      if (p.subject === "")       delete p.subject;
+
+      const created = await createInstruction(p);
+      setRows([created, ...rows]);          // prepend
+      setModal(false);
     } catch (err) {
-      console.error("Greška pri kreiranju instrukcije:", err);
-      alert("Greška pri spremanju instrukcije. Pokušaj ponovo.");
+      alert("Greška pri spremanju instrukcije");
     } finally {
-      setSaving(false);
+      setSave(false);
     }
   }
 
-  // Kad korisnik popuni polje
-  function onChangeField(e) {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }
-
+  /* render */
   return (
-    <div
-      className="
-        min-h-screen flex flex-col
-        bg-[url('/backgrounds/chat-bg.png')] bg-cover bg-fixed
-      "
-    >
-      {/* NAVBAR */}
+    <div className="min-h-screen flex flex-col bg-white">
       <NavBar />
 
-      <div className="flex-1 container mx-auto px-4 pt-6 pb-12">
-        {/* Zaglavlje i gumb za novu instrukciju */}
+      <main className="flex-1 container mx-auto px-4 pt-6 pb-12">
+        {/* header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">
-            Instruktori i instrukcije
-          </h1>
+          <h1 className="text-3xl font-bold text-slate-900">Instrukcije</h1>
           <button
-            onClick={onOpenModal}
-            className="
-              flex items-center gap-2 rounded-full bg-blue-600
-              px-4 py-2 text-white text-sm font-semibold
-              hover:bg-blue-700 transition
-            "
+            onClick={() => {
+              setForm({ title: "", subject: "", description: "", hourly_rate: "", contact_info: "" });
+              setModal(true);
+            }}
+            className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
           >
             <span className="text-xl leading-none">+</span> Dodaj novu
           </button>
         </div>
 
-        {/* Lista instrukcija */}
+        {/* list */}
         {loading ? (
           <p className="text-center text-slate-700">Učitavanje…</p>
-        ) : instructions.length === 0 ? (
-          <p className="text-center text-slate-700">
-            Trenutno nema objavljenih instrukcija.
-          </p>
+        ) : rows.length === 0 ? (
+          <p className="text-center text-slate-700">Trenutno nema objavljenih instrukcija.</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {instructions.map((inst) => (
-              <InstructionCard
-                key={inst.id}
-                instruction={{
-                  id: inst.id,
-                  authorName: inst.author_name || "Nepoznato",
-                  authorAvatarUrl: inst.author_avatar_url || null,
-                  createdAt: inst.created_at,
-                  title: inst.title,
-                  description: inst.description,
-                  hourly_rate: inst.hourly_rate,
-                  subject: inst.subject,
-                }}
-              />
+            {rows.map((r) => (
+              <InstructionCard key={r.id} instruction={r} />
             ))}
           </div>
         )}
-      </div>
+      </main>
 
-      {/* MODAL za dodavanje nove instrukcije */}
+      {/* modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">
             <button
-              onClick={() => setShowModal(false)}
+              onClick={() => setModal(false)}
               className="absolute right-4 top-4 text-xl font-bold text-slate-600 hover:text-slate-800"
             >
               &times;
             </button>
+
             <h2 className="p-6 pt-10 text-2xl font-semibold text-slate-900">
               Nova instrukcija
             </h2>
-            <form
-              onSubmit={onSubmit}
-              className="space-y-4 px-6 pb-8"
-            >
+
+            {/* FORM */}
+            <form onSubmit={onSubmit} className="space-y-4 px-6 pb-8">
+              {/* title */}
               <div>
                 <label className="block text-sm font-medium text-slate-700">
                   Naslov <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="text"
-                  name="title"
                   required
-                  value={formData.title}
-                  onChange={onChangeField}
-                  className="
-                    mt-1 block w-full rounded-md border-gray-300
-                    shadow-sm focus:border-blue-500 focus:ring-blue-500
-                    sm:text-sm
-                  "
+                  name="title"
+                  value={form.title}
+                  onChange={onField}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
 
+              {/* subject */}
               <div>
                 <label className="block text-sm font-medium text-slate-700">
                   Predmet
                 </label>
                 <input
-                  type="text"
                   name="subject"
-                  value={formData.subject}
-                  onChange={onChangeField}
-                  className="
-                    mt-1 block w-full rounded-md border-gray-300
-                    shadow-sm focus:border-blue-500 focus:ring-blue-500
-                    sm:text-sm
-                  "
+                  value={form.subject}
+                  onChange={onField}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
 
+              {/* description */}
               <div>
                 <label className="block text-sm font-medium text-slate-700">
                   Opis <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  name="description"
                   required
+                  name="description"
                   rows={4}
-                  value={formData.description}
-                  onChange={onChangeField}
-                  className="
-                    mt-1 block w-full rounded-md border-gray-300
-                    shadow-sm focus:border-blue-500 focus:ring-blue-500
-                    sm:text-sm
-                  "
+                  value={form.description}
+                  onChange={onField}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
 
+              {/* two-col */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700">
@@ -216,16 +152,12 @@ export default function InstructionsPage() {
                   </label>
                   <input
                     type="number"
-                    name="hourly_rate"
                     step="0.01"
                     min="0"
-                    value={formData.hourly_rate}
-                    onChange={onChangeField}
-                    className="
-                      mt-1 block w-full rounded-md border-gray-300
-                      shadow-sm focus:border-blue-500 focus:ring-blue-500
-                      sm:text-sm
-                    "
+                    name="hourly_rate"
+                    value={form.hourly_rate}
+                    onChange={onField}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   />
                 </div>
                 <div>
@@ -233,15 +165,10 @@ export default function InstructionsPage() {
                     Kontakt info
                   </label>
                   <input
-                    type="text"
                     name="contact_info"
-                    value={formData.contact_info}
-                    onChange={onChangeField}
-                    className="
-                      mt-1 block w-full rounded-md border-gray-300
-                      shadow-sm focus:border-blue-500 focus:ring-blue-500
-                      sm:text-sm
-                    "
+                    value={form.contact_info}
+                    onChange={onField}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   />
                 </div>
               </div>
@@ -249,23 +176,16 @@ export default function InstructionsPage() {
               <div className="flex justify-end pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  className="
-                    mr-2 rounded-md bg-gray-200 px-4 py-2 text-sm
-                    font-medium text-slate-700 hover:bg-gray-300
-                  "
+                  onClick={() => setModal(false)}
+                  className="mr-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-gray-300"
                   disabled={saving}
                 >
                   Odustani
                 </button>
                 <button
                   type="submit"
-                  className="
-                    rounded-md bg-blue-600 px-4 py-2 text-sm
-                    font-medium text-white hover:bg-blue-700
-                    disabled:opacity-50
-                  "
                   disabled={saving}
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {saving ? "Spremanje…" : "Objavi"}
                 </button>
