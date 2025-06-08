@@ -70,9 +70,12 @@ def login_user(data, db: Session):
 
 def generate_and_save_avatar(user_id: int, first_name: str, db: Session):
     try:
+        print(f"Starting avatar generation for user {user_id} with name {first_name}")
         prompt = generate_avatar_prompt(first_name or "student")
+        print(f"Generated prompt: {prompt}")
         avatar_url = generate_avatar_image(prompt, user_id)
-
+        print(f"Avatar image saved at: {avatar_url}")
+        
         user = db.query(User).filter(User.id == user_id).first()
         if user:
             user.profile_photo_url = avatar_url

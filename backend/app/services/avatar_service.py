@@ -26,21 +26,26 @@ def generate_avatar_prompt(user_name: str) -> str:
                     "Examples: a smiling robot, a colorful book with eyes, a pencil character, a friendly abstract shape with glasses. "
                     "Use clean, minimal design. Avoid fantasy elements and fancy clothes."
                 )
-            },
-            {
-                "role": "assistant",
-                "content": f"Create a cartoon-style avatar for a student named {user_name}. The avatar should be simple, abstract or symbolic, and not look like a real person. Examples: a smiling robot, a colorful book with eyes, a pencil character, a friendly abstract shape with glasses. Use clean, minimal design. Avoid fantasy elements and fancy clothes."
-            }   
+            }  
         ],
         "temperature": 0.9,
-        "max_tokens": 100
+        "max_tokens": 300
     }
 
     response = requests.post(url, headers=headers, json=data)
+
+    print("Groq API Response:", response.status_code, response.text)
+
 
     if response.status_code != 200:
         print("Groq API Error:", response.status_code, response.text)
         raise Exception("Groq API failed")
 
     result = response.json()
-    return result["choices"][0]["message"]["content"].strip()
+    content = result["choices"][0]["message"]["content"].strip()
+
+    if not content:
+        print("Groq returned empty prompt. Using default prompt.")
+        content = "A smiling robot cartoon avatar with glasses."
+
+    return content
