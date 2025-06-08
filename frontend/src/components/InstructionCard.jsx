@@ -7,12 +7,15 @@ import { getMe } from "@/utils/api/auth";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
 
+
 export default function InstructionCard({ instruction, onSaveToggle }) {
   const [hidden, setHidden] = useState(false);
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [me, setMe] = useState(null);
   const [saving, setSaving] = useState(false);
   const [messaging, setMessaging] = useState(false);
+  const router = useRouter();
+
 
   useEffect(() => {
     async function fetchUser() {
