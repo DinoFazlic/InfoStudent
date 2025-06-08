@@ -3,6 +3,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import axios from 'axios';
+import { useNotification } from '@/context/NotificationContext';  // 👈 OVO DODAJ
+
 
 export default function ChatPage() {
   const { id } = useParams();
@@ -13,10 +15,19 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [otherUsername, setOtherUsername] = useState("");
 
-  const { sendMessage } = useWebSocket(currentUserId, (data) => {
-    console.log("Message received:", data);
-    setMessages((prev) => [...prev, data]);
-  });
+  const { showNotification } = useNotification();  // 👈 OVO DODAJ
+
+
+  
+
+const { sendMessage } = useWebSocket(currentUserId, (data) => {
+  console.log("Message received:", data);
+  setMessages((prev) => [...prev, data]);
+
+  // 👇 OVDJE PRIKAŽI NOTIFIKACIJU
+  showNotification(`Nova poruka: ${data.content}`);
+});
+
 
   useEffect(() => {
     axios.get('http://localhost:8000/auth/users/me', { withCredentials: true })

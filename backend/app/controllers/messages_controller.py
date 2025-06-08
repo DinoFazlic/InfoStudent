@@ -3,7 +3,7 @@ from sqlmodel import select, Session
 from app.database import get_db
 from app.models.messages import Message
 from app.models.users import User
-from app.utils.auth import get_current_user  # 👈 ovde sad koristiš iz utils
+from app.utils.auth import get_current_user  
 
 router = APIRouter()
 
