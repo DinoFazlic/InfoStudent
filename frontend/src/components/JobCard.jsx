@@ -178,26 +178,31 @@ export default function JobCard({ job, onApply, onSaveToggle }) {
 
         {/* Header */}
         <header className="flex items-center gap-3 p-5">
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt={authorName}
-              width={48}
-              height={48}
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-emerald-200 flex items-center justify-center font-bold text-emerald-700">
-              {authorName.slice(0, 1).toUpperCase()}
-            </div>
-          )}
-          <div className="flex flex-col">
-            <span className="font-semibold">{authorName}</span>
-            <time className="text-sm text-slate-600">
-              {createdIso ? new Date(createdIso).toLocaleDateString("en-GB") : "--"}
-            </time>
-          </div>
-        </header>
+  {avatarUrl ? (
+    <img
+      src={`http://localhost:8000${avatarUrl}`}
+      alt={authorName}
+      width={48}
+      height={48}
+      className="rounded-full object-cover"
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.src = "/default-avatar.png";  // You can put your default avatar in /public
+      }}
+    />
+  ) : (
+    <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+      {authorName.slice(0, 1).toUpperCase()}
+    </div>
+  )}
+  <div className="flex flex-col">
+    <span className="font-semibold">{authorName}</span>
+    <time className="text-sm text-slate-600">
+      {createdIso ? new Date(createdIso).toLocaleDateString("en-GB") : "--"}
+    </time>
+  </div>
+</header>
+
 
         {/* Job Details */}
         <div className="px-5 pb-5">
