@@ -59,6 +59,8 @@ class InternshipApplication(SQLModel, table=True):
         sa_column=Column(ForeignKey("users.id", ondelete="CASCADE"))
     )
 
+    cv_url: str 
+
     applied_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), server_default=func.now())
     )
@@ -74,3 +76,21 @@ class InternshipApplication(SQLModel, table=True):
 
     internship: Optional[Internship] = Relationship(back_populates="applications")
     student: Optional[User] = Relationship(back_populates="internship_applications")
+
+
+class InternshipSave(SQLModel, table=True):
+    __tablename__ = "internship_saves"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    internship_id: int = Field(
+        sa_column=Column(ForeignKey("internship.id", ondelete="CASCADE"))
+    )
+
+    student_id: int = Field(
+        sa_column=Column(ForeignKey("users.id", ondelete="CASCADE"))
+    )
+
+    saved_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )

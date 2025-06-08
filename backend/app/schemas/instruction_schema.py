@@ -28,7 +28,7 @@ class InstructionRead(InstructionBase):
     id:                int
     created_at:        datetime
     updated_at:        Optional[datetime] = None
-
+    created_by: int
     # polja koja *mi* dodajemo u routeru
     author_name:       Optional[str] = Field(default=None, description="Ime i prezime kreatora")
     author_avatar_url: Optional[str] = Field(default=None, description="URL na profilnu")

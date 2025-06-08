@@ -7,6 +7,8 @@ from app.utils.jwt import create_access_token
 from jose import jwt
 import os 
 from datetime import datetime, timedelta
+from fastapi.encoders import jsonable_encoder
+
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -52,4 +54,4 @@ def login_controller(data: LoginRequest, response: Response, db: Session):
         path="/"
     )
 
-    return {"user":user}
+    return {"user": jsonable_encoder(user)}

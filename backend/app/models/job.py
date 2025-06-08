@@ -57,6 +57,10 @@ class Job(SQLModel, table=True):
         back_populates="job",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
+    saves: List["JobSave"] = Relationship(
+    back_populates="job",
+    sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+)
 
 
 class JobSchedule(SQLModel, table=True):
@@ -75,7 +79,7 @@ class JobSchedule(SQLModel, table=True):
 
 
 class JobApplication(SQLModel, table=True):
-    __tablename__ = "job_applications"         # ← plural
+    __tablename__ = "job_applications"      
 
     id: Optional[int] = Field(default=None, primary_key=True)
 
@@ -99,3 +103,23 @@ class JobApplication(SQLModel, table=True):
 
     job: Optional[Job] = Relationship(back_populates="applications")
     student: Optional[User] = Relationship(back_populates="job_applications")
+
+
+class JobSave(SQLModel, table=True):
+    __tablename__ = "job_saves"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    job_id: int = Field(
+        sa_column=Column(ForeignKey("jobs.id", ondelete="CASCADE"))
+    )
+    student_id: int = Field(
+        sa_column=Column(ForeignKey("users.id", ondelete="CASCADE"))
+    )
+
+    saved_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )
+
+    job: Optional[Job] = Relationship(back_populates="saves")
+    student: Optional[User] = Relationship(back_populates="job_saves")

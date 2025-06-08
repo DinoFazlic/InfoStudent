@@ -22,8 +22,11 @@ class InternshipCreate(InternshipBase):
 
 class InternshipRead(InternshipBase):
     id: int
+    created_by: int
     posted_at: datetime
     author_name: Optional[str] = None
     author_avatar_url: Optional[str] = None
+    applied: Optional[bool] = False
+    saved: bool = False
 
     model_config = {"from_attributes": True}

@@ -4,6 +4,7 @@ from typing      import Optional, List
 
 from sqlmodel    import SQLModel, Field, Relationship, Column
 from sqlalchemy  import DateTime, func, ForeignKey
+from app.models.users import User
 
 # ————————————————————————————————————————————————
 class Instruction(SQLModel, table=True):
@@ -40,10 +41,6 @@ class Instruction(SQLModel, table=True):
 
 
 class InstructionSchedule(SQLModel, table=True):
-    """
-    Jednostavan raspored za instruktora:
-    koji dan, od–do.
-    """
     __tablename__ = "instruction_schedules"
 
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -54,3 +51,21 @@ class InstructionSchedule(SQLModel, table=True):
     end_time:   time
 
     instruction: Optional[Instruction] = Relationship(back_populates="schedules")
+
+
+class InstructionSave(SQLModel, table=True):
+    __tablename__ = "instruction_saves"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    instruction_id: int = Field(
+        sa_column=Column(ForeignKey("instructions.id", ondelete="CASCADE"))
+    )
+
+    student_id: int = Field(
+        sa_column=Column(ForeignKey("users.id", ondelete="CASCADE"))
+    )
+
+    saved_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )

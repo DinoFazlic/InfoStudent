@@ -36,3 +36,13 @@ export async function createInstruction(payload) {
     createdAt:         i.created_at,
   };
 }
+
+
+export async function deleteInstruction(id) {
+  const res = await fetch(`${BASE}/api/instructions/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to delete: " + res.status);
+}
+

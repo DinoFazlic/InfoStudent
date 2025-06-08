@@ -4,7 +4,7 @@ const BASE =
 
 
 /**
- * Poziv GET /auth/users/me
+ * Poziv GET users/me
  *  – vraća { id, first_name, last_name, role, ... }
  *  – ili `null` ako nije prijavljen
  */
@@ -13,8 +13,9 @@ export async function getMe() {
     credentials: "include",
   });
 
-  if (res.status === 401) return null;         // nije logiran
+  if (res.status === 401) return null;
   if (!res.ok) throw new Error(res.statusText);
 
   return res.json();
 }
+

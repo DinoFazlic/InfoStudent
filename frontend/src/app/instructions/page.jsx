@@ -3,153 +3,153 @@
 import { useEffect, useState } from "react";
 import NavBar from "@/components/Navbar";
 import InstructionCard from "@/components/InstructionCard";
-import {
-  listInstructions,
-  createInstruction,
-} from "@/utils/api/instructions";
+import { listInstructions, createInstruction, deleteInstruction } from "@/utils/api/instructions";
+import { getMe } from "@/utils/api/auth";
 
 export default function InstructionsPage() {
-  /* state */
-  const [rows,      setRows]   = useState([]);
-  const [loading,   setLoad]   = useState(true);
-  const [showModal, setModal]  = useState(false);
-  const [saving,    setSave]   = useState(false);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [me, setMe] = useState(null);
+
   const [form, setForm] = useState({
-    title: "", subject: "", description: "",
-    hourly_rate: "", contact_info: "",
+    title: "",
+    subject: "",
+    description: "",
+    hourly_rate: "",
+    contact_info: "",
   });
 
-  /* initial fetch */
   useEffect(() => {
     (async () => {
-      try { setRows(await listInstructions()); }
-      catch (e) { console.error(e); }
-      finally { setLoad(false); }
+      const user = await getMe().catch(() => null);
+      setMe(user);
+      setRows(await listInstructions().catch(() => []));
+      setLoading(false);
     })();
   }, []);
 
-  /* handlers */
+  async function handleDelete(id) {
+    if (!confirm("Delete this instruction?")) return;
+    await deleteInstruction(id);
+    setRows(rows.filter(r => r.id !== id));
+  }
+
   const onField = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   async function onSubmit(e) {
     e.preventDefault();
-    setSave(true);
+    setSaving(true);
     try {
-      /* payload cleanup */
-      const p = { ...form };
-      if (p.hourly_rate === "")   delete p.hourly_rate;
-      if (p.contact_info === "")  delete p.contact_info;
-      if (p.subject === "")       delete p.subject;
+      const payload = { ...form };
+      if (payload.hourly_rate === "") delete payload.hourly_rate;
+      if (payload.contact_info === "") delete payload.contact_info;
+      if (payload.subject === "") delete payload.subject;
 
-      const created = await createInstruction(p);
-      setRows([created, ...rows]);          // prepend
-      setModal(false);
-    } catch (err) {
-      alert("Greška pri spremanju instrukcije");
+      const created = await createInstruction(payload);
+      setRows([created, ...rows]);
+      setShowModal(false);
     } finally {
-      setSave(false);
+      setSaving(false);
     }
   }
 
-  /* render */
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <NavBar />
 
       <main className="flex-1 container mx-auto px-4 pt-6 pb-12">
-        {/* header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Instrukcije</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
           <button
             onClick={() => {
               setForm({ title: "", subject: "", description: "", hourly_rate: "", contact_info: "" });
-              setModal(true);
+              setShowModal(true);
             }}
-            className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700"
           >
-            <span className="text-xl leading-none">+</span> Dodaj novu
+            <span className="text-lg flex items-center justify-center">+</span> Add Instruction
           </button>
         </div>
 
-        {/* list */}
         {loading ? (
-          <p className="text-center text-slate-700">Učitavanje…</p>
+          <p className="text-center text-slate-700">Loading instructions…</p>
         ) : rows.length === 0 ? (
-          <p className="text-center text-slate-700">Trenutno nema objavljenih instrukcija.</p>
+          <p className="text-center text-slate-700">No instructions available.</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {rows.map((r) => (
-              <InstructionCard key={r.id} instruction={r} />
+            {rows.map(r => (
+              <InstructionCard
+                key={r.id}
+                instruction={{
+                  ...r,
+                  canDelete: me && (me.role === "admin" || me.id === r.created_by),
+                  onDelete: handleDelete,
+                  createdBy: r.created_by,
+                }}
+                onSaveToggle={(id, nowSaved) => {
+                  if (nowSaved) {
+                    setRows((prev) => prev.filter((instruction) => instruction.id !== id));
+                  }
+                }}
+              />
             ))}
           </div>
         )}
       </main>
 
-      {/* modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">
             <button
-              onClick={() => setModal(false)}
+              onClick={() => setShowModal(false)}
               className="absolute right-4 top-4 text-xl font-bold text-slate-600 hover:text-slate-800"
             >
               &times;
             </button>
 
-            <h2 className="p-6 pt-10 text-2xl font-semibold text-slate-900">
-              Nova instrukcija
+            <h2 className="p-6 pt-10 text-2xl font-semibold text-slate-900 text-center">
+              New Instruction
             </h2>
 
-            {/* FORM */}
-            <form onSubmit={onSubmit} className="space-y-4 px-6 pb-8">
-              {/* title */}
+            <form onSubmit={onSubmit} className="space-y-6 px-6 pb-8">
               <div>
-                <label className="block text-sm font-medium text-slate-700">
-                  Naslov <span className="text-red-500">*</span>
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Title *</label>
                 <input
                   required
                   name="title"
                   value={form.title}
                   onChange={onField}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
-              {/* subject */}
               <div>
-                <label className="block text-sm font-medium text-slate-700">
-                  Predmet
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Subject</label>
                 <input
                   name="subject"
                   value={form.subject}
                   onChange={onField}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
-              {/* description */}
               <div>
-                <label className="block text-sm font-medium text-slate-700">
-                  Opis <span className="text-red-500">*</span>
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Description *</label>
                 <textarea
                   required
                   name="description"
                   rows={4}
                   value={form.description}
                   onChange={onField}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
 
-              {/* two-col */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Satnica (KM/h)
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Hourly Rate (KM/h)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -157,37 +157,35 @@ export default function InstructionsPage() {
                     name="hourly_rate"
                     value={form.hourly_rate}
                     onChange={onField}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Kontakt info
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Contact Info</label>
                   <input
                     name="contact_info"
                     value={form.contact_info}
                     onChange={onField}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-6">
                 <button
                   type="button"
-                  onClick={() => setModal(false)}
+                  onClick={() => setShowModal(false)}
                   className="mr-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-gray-300"
                   disabled={saving}
                 >
-                  Odustani
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
                   className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {saving ? "Spremanje…" : "Objavi"}
+                  {saving ? "Saving…" : "Post Instruction"}
                 </button>
               </div>
             </form>

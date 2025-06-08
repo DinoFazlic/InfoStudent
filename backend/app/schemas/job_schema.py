@@ -23,6 +23,8 @@ class JobRead(JobBase):
     updated_at: Optional[datetime] = None
     author_name: Optional[str] = None
     author_avatar_url: Optional[str] = None
+    applied: bool
+    saved: bool = False
 
     class Config:
         from_attributes = True

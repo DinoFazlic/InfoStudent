@@ -1,11 +1,18 @@
 # backend/app/models/users.py
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional,TYPE_CHECKING
 
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, DateTime, func
 
+if TYPE_CHECKING:
+    from .job import Job, JobSchedule, JobApplication, JobSave
+    from .student_profile import StudentProfile
+    from .employer_profile import EmployerProfile
+    from .review import Review
+    from .instruction import Instruction
+    from .internship import Internship, InternshipApplication
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -49,24 +56,17 @@ class User(SQLModel, table=True):
     instructions: List["Instruction"] = Relationship(back_populates="author")
 
     jobs: List["Job"] = Relationship(back_populates="owner")
+    
     internships: List["Internship"] = Relationship(back_populates="owner")
+    
     job_applications: List["JobApplication"] = Relationship(back_populates="student")
+    
     internship_applications: List["InternshipApplication"] = Relationship(
         back_populates="student"
     )
 
-    # Napomena: relaciju prema OfferInterest više nemamo, jer fajl 'offer_interest.py' ne postoji.
+    job_saves: List["JobSave"] = Relationship(
+    back_populates="student",
+    sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+)
 
-
-# ────────────────────────────────────────────────────────────────────────────────
-#  Lazy importi (postojeći modeli iz istog foldera)
-# ────────────────────────────────────────────────────────────────────────────────
-from .student_profile import StudentProfile
-from .employer_profile import EmployerProfile
-from .review import Review
-from .instruction import Instruction
-from .job import Job, JobSchedule
-
-from .internship import Internship, InternshipApplication
-# Ako u budućnosti implementirate OfferInterest, dodajte ga ovdje:
-# from .offer_interest import OfferInterest

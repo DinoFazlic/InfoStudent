@@ -1,11 +1,11 @@
 # app/routes/instruction_router.py
 from typing import List
 
-from fastapi       import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
-from app.dependencies              import get_db, get_current_user
-from app.models.instruction        import Instruction
+from app.dependencies import get_db, get_current_user
+from app.models.instruction        import Instruction, InstructionSave
 from app.models.users              import User
 from app.schemas.instruction_schema import InstructionCreate, InstructionRead
 
@@ -17,16 +17,25 @@ router = APIRouter(prefix="/api/instructions", tags=["instructions"])
 
 # ─────────────────────────────── GET /api/instructions ─────────────────────────
 @router.get("", response_model=List[InstructionRead])
-def list_instructions(db: Session = Depends(get_db)):
-    """
-    Vrati sve instrukcije sortirane po datumu (najnovije prve).
-    Backend lijepo popuni `author_name`, `author_avatar_url`
-    i pretvori datetime → ISO string koje Pydantic/React vole.
-    """
+def list_instructions(db: Session = Depends(get_db),user = Depends(get_current_user),):
+
     rows = db.query(Instruction).order_by(Instruction.created_at.desc()).all()
     out: List[InstructionRead] = []
 
+    saved_instruction_ids = set()
+
+    if user and user.role == "student":
+        saved_instruction_ids = {
+            row.instruction_id
+            for row in db.query(InstructionSave.instruction_id)
+            .filter(InstructionSave.student_id == user.id)
+            .all()
+        }
+
     for inst in rows:
+        if inst.id in saved_instruction_ids:
+            continue
+
         user: User | None = db.get(User, inst.created_by)
 
         # ------- siguran fallback za ime + avatar -----------
@@ -36,7 +45,7 @@ def list_instructions(db: Session = Depends(get_db)):
         # -----------------------------------------------------
 
         data = inst.model_dump()
-
+        data["created_by"] = inst.created_by
         # pretvorba na ISO string (frontendu lakše)
         data["created_at"] = inst.created_at.isoformat()
         if inst.updated_at:
@@ -77,3 +86,24 @@ def create_instruction(
     data["author_avatar_url"] = user.profile_photo_url
 
     return InstructionRead.model_validate(data)
+
+
+
+@router.delete("/{instruction_id}", status_code=204)
+def delete_instruction(
+    instruction_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """
+    Delete instruction only if the logged-in user is the creator.
+    """
+    instruction = db.get(Instruction, instruction_id)
+    if not instruction:
+        raise HTTPException(status_code=404, detail="Instruction not found.")
+
+    if instruction.created_by != user.id and user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to delete this instruction.")
+
+    db.delete(instruction)
+    db.commit()

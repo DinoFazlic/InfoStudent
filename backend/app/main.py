@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import SQLModel
 import os
 
-from app import models             # Pretpostavlja da models/__init__.py importira sve modele
+from app import models             
 from app.database import engine
 from app.routes.job_router import router as job_router
 from app.routes import auth, profile, review_router, avatar_test
@@ -12,8 +12,19 @@ from app.routes.instruction_router import router as instruction_router
 from app.controllers.messages_controller import router as messages_router
 from app.websocket.chat_socket import websocket_chat
 from app.routes.internship_router import router as internship_router
+from app.routes import job_application_router
+from app.routes import job_saves_router
+from app.controllers import ai_controller
+from app.routes.internship_application_router import router as internship_application_router
+from app.routes.internship_save_router import router as internship_save_router
+from app.routes import instruction_save_router
+
+
+
 
 app = FastAPI()
+
+
 
 # ───── CORS ───────────────────────────────────────────────────────────────────
 app.add_middleware(
@@ -37,6 +48,7 @@ os.makedirs("app/static/schedule_uploads", exist_ok=True)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # ───── KREIRANJE SVIH TABLICA ─────────────────────────────────────────────────
+
 SQLModel.metadata.create_all(bind=engine)
 
 # ───── WEBSOCKET ZA CHAT ──────────────────────────────────────────────────────
@@ -55,3 +67,10 @@ app.include_router(avatar_test.router)
 app.include_router(instruction_router)
 app.include_router(job_router)
 app.include_router(internship_router)
+app.include_router(job_application_router.router)
+app.include_router(job_saves_router.router)
+app.include_router(ai_controller.router)
+app.include_router(internship_application_router)
+app.include_router(internship_save_router)
+app.include_router(instruction_save_router.router)
+
