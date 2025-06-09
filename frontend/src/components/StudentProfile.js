@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
+import toast from 'react-hot-toast';
 import StudentSidebar from "@/components/StudentProfileSections/StudentSidebar";
 import StudentProfileSection from "@/components/StudentProfileSections/StudentProfileSection";
 import StudentReviewsSection from "@/components/StudentProfileSections/StudentReviewsSection";
@@ -21,6 +21,9 @@ function StudentProfile() {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [appliedInternships, setAppliedInternships] = useState([]);
   const [appliedInstructions, setAppliedInstructions] = useState([]);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleData, setScheduleData] = useState([]);
+
   const [dataLoaded, setDataLoaded] = useState({
     profile: true,
     myReviews: false,
@@ -29,23 +32,26 @@ function StudentProfile() {
     myApplications: false,
   });
 
-  useEffect(() => {
-    fetch("http://localhost:8000/auth/users/me", { credentials: "include" })
-      .then((res) => {
-        if (res.status === 401) window.location.href = "/login";
-        return res.json();
-      })
-      .then((data) => {
-        if (data.role !== "student") {
-          window.location.href = "/login";
-          return;
-        }
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/auth/users/me", {
+        credentials: "include"
+      });
+      if (res.ok) {
+        const data = await res.json();
         const studentData = { ...data, ...data.student_profile };
         setProfile(studentData);
         setBackupProfile(studentData);
-      })
-      .catch((err) => console.error("Error:", err));
+      }
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
   }, []);
+
 
   useEffect(() => {
     if (activeSection === "myReviews" && !dataLoaded.myReviews) {
@@ -162,8 +168,11 @@ function StudentProfile() {
         const data = await res.json();
         if (res.ok) {
           setProfile((prev) => ({ ...prev, cv_url: data.cv_url }));
+          toast.success("CV uploaded successfully!");
+          await fetchProfile();
         } else {
           console.error("Failed to upload CV:", data.detail);
+          toast.error("Failed to upload CV.");
         }
       } catch (err) {
         console.error("Upload error:", err);
@@ -190,9 +199,19 @@ function StudentProfile() {
 
       if (res.ok) {
         const data = await res.json();
-        setProfile((prev) => ({ ...prev, schedule_url: data.schedule_url }));
+
+        setProfile((prev) => ({
+          ...prev,
+          student_profile: {
+            ...prev.student_profile,
+            schedule_url: data.schedule_url,
+          },
+        }));
+
+        toast.success("Schedule uploaded successfully!");
+        //await fetchProfile();
       } else {
-        alert("Failed to upload schedule.");
+         toast.error("Failed to upload schedule.");
       }
     };
     input.click();
@@ -214,7 +233,7 @@ function StudentProfile() {
       experience: profile.experience,
     };
 
-    fetch("http://localhost:8000/users/student/profile", {
+    fetch("http://localhost:8000/student/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -259,6 +278,8 @@ function StudentProfile() {
             handleSaveChanges={handleSaveChanges}
             handleUploadSchedule={handleUploadSchedule}
             handleCancelEdit={handleCancelEdit}
+            setShowScheduleModal={setShowScheduleModal}
+            setScheduleData={setScheduleData}
           />
         );
       case "myReviews":
@@ -323,6 +344,52 @@ function StudentProfile() {
       <div className="flex-1 p-10 flex justify-center transition-margin-left duration-300 md:ml-[250px]">
         {renderSection()}
       </div>
+
+      {showScheduleModal && (
+  <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-black/30 z-[1200]">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-4xl overflow-y-auto max-h-[90%]">
+      <h2 className="text-xl font-bold mb-4 text-center">Your Weekly Schedule</h2>
+      <table className="min-w-full table-fixed border-collapse border border-gray-300">
+        <thead>
+          <tr>
+            <th className="border border-gray-300 p-2">Time</th>
+            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
+              <th key={day} className="border border-gray-300 p-2">{day}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {["08:15", "09:15", "10:15", "11:15", "12:15", "13:15", "14:15", "15:15", "16:15", "17:15"].map((time) => (
+            <tr key={time}>
+              <td className="border border-gray-300 p-2 font-semibold">{time}</td>
+              {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
+                <td
+                  key={day}
+                  className={`border border-gray-300 p-2 text-center ${
+                    scheduleData.some(slot => slot.day === day && slot.start_time === time)
+                      ? "bg-blue-500 text-white font-bold"
+                      : "bg-gray-100"
+                  }`}
+                >
+                  {scheduleData.some(slot => slot.day === day && slot.start_time === time) ? "Busy" : ""}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mt-4 text-right">
+        <button
+          className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+          onClick={() => setShowScheduleModal(false)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
