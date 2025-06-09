@@ -15,7 +15,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [otherUsername, setOtherUsername] = useState("");
 
-  const { showNotification } = useNotification();  // 👈 OVO DODAJ
+  const { showNotification } = useNotification(); 
 
 
   
@@ -24,7 +24,6 @@ const { sendMessage } = useWebSocket(currentUserId, (data) => {
   console.log("Message received:", data);
   setMessages((prev) => [...prev, data]);
 
-  // 👇 OVDJE PRIKAŽI NOTIFIKACIJU
   showNotification(`Nova poruka: ${data.content}`);
 });
 
