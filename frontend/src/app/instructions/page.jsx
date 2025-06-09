@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import NavBar from "@/components/Navbar";
+import Footer from '@/components/Footer';
 import InstructionCard from "@/components/InstructionCard";
 import { listInstructions, createInstruction, deleteInstruction } from "@/utils/api/instructions";
 import { getMe } from "@/utils/api/auth";
@@ -58,7 +59,6 @@ export default function InstructionsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <NavBar />
-
       <main className="flex-1 container mx-auto px-4 pt-6 pb-12">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
@@ -97,8 +97,9 @@ export default function InstructionsPage() {
             ))}
           </div>
         )}
+        
       </main>
-
+      <Footer />
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">

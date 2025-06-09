@@ -13,7 +13,7 @@ class EmployerProfile(SQLModel, table=True):          # ← OVO ime mora postoja
         index=True,
     )
 
-    company_name: str
+    company_name: Optional[str] = None
     company_description: Optional[str] = None
     address: Optional[str] = None
     website_url: Optional[str] = None

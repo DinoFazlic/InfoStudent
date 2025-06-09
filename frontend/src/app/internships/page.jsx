@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import NavBar from "@/components/Navbar";
+import Footer from '@/components/Footer';
 import InternshipCard from "@/components/InternshipCard";
 import { listInternships, createInternship, deleteInternship } from "@/utils/api/internships";
 import { getMe } from "@/utils/api/auth";
@@ -91,7 +92,7 @@ export default function PraksePage() {
           </div>
         )}
       </div>
-
+      <Footer />
       {show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">

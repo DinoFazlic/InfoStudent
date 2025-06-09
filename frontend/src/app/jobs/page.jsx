@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import JobCard from "@/components/JobCard";
 import NavBar from "@/components/Navbar";
+import Footer from '@/components/Footer';
 import { listJobs, createJob, deleteJob } from "@/utils/api/jobs";
 import { getMe } from "@/utils/api/auth";
 
@@ -137,7 +138,7 @@ export default function JobsPage() {
           </div>
         )}
       </div>
-
+      <Footer />
       {/* Modal for Adding Job */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
