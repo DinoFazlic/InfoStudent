@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from app.models.availability import Student_Availability
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.utils.auth import get_current_user
@@ -51,3 +52,20 @@ def upload_student_cv(
 @router.post("/student/upload-schedule")
 def upload_schedule(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return upload_schedule_controller(file, db, current_user)
+
+
+@router.get("/student/availability", response_model=list[dict])
+def get_student_availability(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != "student":
+        raise HTTPException(status_code=403, detail="Only students can access availability")
+
+    slots = db.query(Student_Availability).filter_by(student_id=current_user.id).all()
+
+    return [
+        {
+            "day": slot.day,
+            "start_time": slot.start_time.strftime("%H:%M"),
+            "end_time": slot.end_time.strftime("%H:%M"),
+        }
+        for slot in slots
+    ]

@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
+import toast from 'react-hot-toast';
 
 const schema = z.object({
   first_name: z.string().min(2, "First name is required"),
@@ -35,7 +36,8 @@ export default function Register() {
       await axios.post("http://localhost:8000/auth/register", data, {
         withCredentials: true,
       });
-      alert("Registration successful!");
+      toast.success("Registration successful!");
+      
     } catch (err) {
       alert(err.response?.data?.detail || "Registration failed");
     }
