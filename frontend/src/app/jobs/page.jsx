@@ -81,38 +81,30 @@ export default function JobsPage() {
 
   // ────────── render ──────────
   return (
-    <div className="min-h-screen flex flex-col bg-[url('/backgrounds/chat-bg.png')] bg-cover bg-fixed">
+    <div className="min-h-screen flex flex-col bg-white">
       <NavBar />
 
-      <div className="flex-1 container mx-auto px-4 pt-6 pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Job Listings</h1>
+      <div className="container mx-auto flex-1 px-4 pt-6 pb-10">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-amber-600">Job Listings</h1>
 
-
-          {/* Only show button when me is loaded */}
           {!loading && (me?.role === "employer" || me?.role === "admin") && (
             <button
-            onClick={() => {
-              setForm({ title: "", description: "", location: "", price: "" });
-              setShowModal(true);
-            }}
-            className="flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-white text-base font-semibold hover:bg-emerald-700"
-          >
-            <span className="text-lg flex items-center justify-center">
-              +
-            </span>
-            Add Job
-          </button>
-
-
+              onClick={() => {
+                setForm({ title: "", description: "", location: "", price: "" });
+                setShowModal(true);
+              }}
+              className="flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-white text-base font-semibold hover:bg-amber-600"
+            >
+              <span className="text-lg flex items-center justify-center">+</span> Add Job
+            </button>
           )}
         </div>
 
-        {/* Jobs list */}
         {loading ? (
-          <p className="text-center text-slate-700">Loading jobs…</p>
+          <p className="text-center text-slate-600">Loading…</p>
         ) : jobs.length === 0 ? (
-          <p className="text-center text-slate-700">No job postings available.</p>
+          <p className="text-center text-slate-600">No job postings available.</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((j) => (
@@ -132,7 +124,6 @@ export default function JobsPage() {
                     setJobs((prev) => prev.filter((job) => job.id !== id));
                   }
                 }}
-
               />
             ))}
           </div>
