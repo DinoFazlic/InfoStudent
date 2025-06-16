@@ -15,6 +15,9 @@ export async function listInstructions() {
     authorName:        i.author_name       ?? "Nepoznato",
     authorAvatarUrl:   i.author_avatar_url ?? null,
     createdAt:         i.created_at,
+    author_email:      i.author_email ?? null,
+    author_phone:      i.author_phone ?? null,
+    author_schedule_url: i.author_schedule_url ?? null,
   }));
 }
 
@@ -34,6 +37,9 @@ export async function createInstruction(payload) {
     authorName:        i.author_name,
     authorAvatarUrl:   i.author_avatar_url,
     createdAt:         i.created_at,
+    author_email:      i.author_email ?? null,
+    author_phone:      i.author_phone ?? null,
+    author_schedule_url: i.author_schedule_url ?? null,
   };
 }
 
@@ -44,5 +50,27 @@ export async function deleteInstruction(id) {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to delete: " + res.status);
+}
+
+
+export async function updateInstruction(id, payload) {
+  const res = await fetch(`${BASE}/api/instructions/${id}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to update: " + res.status);
+
+  const i = await res.json();
+  return {
+    ...i,
+    authorName: i.author_name,
+    authorAvatarUrl: i.author_avatar_url,
+    createdAt: i.created_at,
+    author_email: i.author_email ?? null,
+    author_phone: i.author_phone ?? null,
+    author_schedule_url: i.author_schedule_url ?? null,
+  };
 }
 

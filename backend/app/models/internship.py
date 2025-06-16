@@ -4,16 +4,15 @@ from typing import Optional, List
 
 from sqlmodel import SQLModel, Field, Relationship, Column
 
-from sqlalchemy import DateTime, func, ForeignKey, Enum as SQLEnum   #  ✅
+from sqlalchemy import DateTime, func, ForeignKey, Enum as SQLEnum
 
 from .users import User
-
+from .employer_profile import EmployerProfile # Corrected import for EmployerProfile
 
 class ApplicationStatus(str, enum.Enum):
     pending = "pending"
     accepted = "accepted"
     rejected = "rejected"
-
 
 class Internship(SQLModel, table=True):
     __tablename__ = "internship"
@@ -26,18 +25,15 @@ class Internship(SQLModel, table=True):
 
     title: str
     description: str
-    company: Optional[str] = None
     location: Optional[str] = None
     stipend: Optional[float] = None
-    contact_email: Optional[str] = None
 
     posted_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), server_default=func.now())
     )
     start_date: Optional[date] = None
     end_date: Optional[date] = None
-
-    # ===== RELACIJE =====
+    application_deadline: Optional[date] = None
 
     owner: Optional[User] = Relationship(back_populates="internships")
 
@@ -45,7 +41,6 @@ class Internship(SQLModel, table=True):
         back_populates="internship",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
-
 
 class InternshipApplication(SQLModel, table=True):
     __tablename__ = "internship_application"
@@ -59,7 +54,7 @@ class InternshipApplication(SQLModel, table=True):
         sa_column=Column(ForeignKey("users.id", ondelete="CASCADE"))
     )
 
-    cv_url: str 
+    cv_url: Optional[str] = None
 
     applied_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), server_default=func.now())
@@ -68,15 +63,12 @@ class InternshipApplication(SQLModel, table=True):
         sa_column=Column(
             SQLEnum(ApplicationStatus, name="internship_application_status_enum"),
             default=ApplicationStatus.pending,
-            server_default=ApplicationStatus.pending.value,  # server_default = "pending"
+            server_default=ApplicationStatus.pending.value,
         )
     )
 
-    # ===== RELACIJE =====
-
     internship: Optional[Internship] = Relationship(back_populates="applications")
     student: Optional[User] = Relationship(back_populates="internship_applications")
-
 
 class InternshipSave(SQLModel, table=True):
     __tablename__ = "internship_saves"

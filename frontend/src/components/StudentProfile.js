@@ -233,21 +233,28 @@ function StudentProfile() {
       experience: profile.experience,
     };
 
-    fetch("http://localhost:8000/student/profile", {
+    fetch("http://localhost:8000/users/student/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(updatedData),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to update");
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.detail || "Failed to update profile");
+        }
         return res.json();
       })
       .then((data) => {
         setEditMode(false);
         setBackupProfile(profile);
+        toast.success("Profile updated successfully!");
       })
-      .catch((err) => console.error("Update failed:", err));
+      .catch((err) => {
+        console.error("Update failed:", err);
+        toast.error(err.message || "Failed to update profile");
+      });
   };
 
   if (!profile) {

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_db, get_current_user
 from app.models.instruction        import Instruction, InstructionSave
 from app.models.users              import User
-from app.schemas.instruction_schema import InstructionCreate, InstructionRead
+from app.schemas.instruction_schema import InstructionCreate, InstructionRead, InstructionUpdate
 
 
 # ---------------------------------------------------------------------------
@@ -42,6 +42,9 @@ def list_instructions(db: Session = Depends(get_db),user = Depends(get_current_u
         author_name   = ((user.first_name or "") + " " + (user.last_name or "")).strip() if user else None
         author_name   = author_name or (user.email if user else "Nepoznato")
         avatar_url    = user.profile_photo_url if user else None
+        author_email  = user.email if user else None
+        author_phone  = user.contact_phone if user else None
+        schedule_url  = user.student_profile.schedule_url if (user and hasattr(user, "student_profile") and user.student_profile) else None
         # -----------------------------------------------------
 
         data = inst.model_dump()
@@ -53,6 +56,9 @@ def list_instructions(db: Session = Depends(get_db),user = Depends(get_current_u
 
         data["author_name"]       = author_name
         data["author_avatar_url"] = avatar_url
+        data["author_email"]      = author_email
+        data["author_phone"]      = author_phone
+        data["author_schedule_url"] = schedule_url
 
         out.append(InstructionRead.model_validate(data))
 
@@ -88,7 +94,6 @@ def create_instruction(
     return InstructionRead.model_validate(data)
 
 
-
 @router.delete("/{instruction_id}", status_code=204)
 def delete_instruction(
     instruction_id: int,
@@ -107,3 +112,45 @@ def delete_instruction(
 
     db.delete(instruction)
     db.commit()
+
+
+# ─────────────────────────────── PUT /api/instructions/{id} ────────────────
+@router.put("/{instruction_id}", response_model=InstructionRead)
+def update_instruction(
+    instruction_id: int,
+    payload: InstructionUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Update an instruction owned by the current user (or admin)."""
+
+    instruction: Instruction | None = db.get(Instruction, instruction_id)
+    if not instruction:
+        raise HTTPException(status_code=404, detail="Instruction not found.")
+
+    if instruction.created_by != user.id and user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to update this instruction.")
+
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        setattr(instruction, key, value)
+
+    db.add(instruction)
+    db.commit()
+    db.refresh(instruction)
+
+    # prepare response same as list
+    author_name = ((user.first_name or "") + " " + (user.last_name or "")).strip() or user.email
+    avatar_url  = user.profile_photo_url
+    data = instruction.model_dump()
+    data["created_by"] = instruction.created_by
+    data["created_at"] = instruction.created_at.isoformat()
+    if instruction.updated_at:
+        data["updated_at"] = instruction.updated_at.isoformat()
+
+    data["author_name"] = author_name
+    data["author_avatar_url"] = avatar_url
+    data["author_email"] = user.email
+    data["author_phone"] = user.contact_phone
+    data["author_schedule_url"] = user.student_profile.schedule_url if hasattr(user, "student_profile") and user.student_profile else None
+
+    return InstructionRead.model_validate(data)
