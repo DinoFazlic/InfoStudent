@@ -72,9 +72,9 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
         toast.success("Job unsaved!");
       }
 
-      setSaved(!saved);
+      setSaved(!saved); 
       if (onSaveToggle) {
-        onSaveToggle(job.id, !saved);
+        onSaveToggle(job.id, !saved); 
       }
     } catch (err) {
       console.error("Save/Unsave error:", err);
@@ -207,14 +207,14 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
 
         {me && me.role === "student" && (
           <div className="absolute right-3 top-3 flex gap-2 z-10">
-            <button
+          <button
               onClick={handleToggleSave}
               disabled={savingJob}
               className="text-lg font-bold text-yellow-500 hover:text-yellow-700"
               title={saved ? "Unsave Job" : "Save Job"}
             >
               {saved ? <FaBookmark /> : <FaRegBookmark />}
-            </button>
+          </button>
           </div>
         )}
 
@@ -222,32 +222,32 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
           <header className="flex items-center gap-3 p-5 border-b border-gray-100 bg-white/70 backdrop-blur-sm">
             <Link href={profileLink}>
               <div className="cursor-pointer">
-                {avatarUrl ? (
+  {avatarUrl ? (
                   <Image
-                    src={`http://localhost:8000${avatarUrl}`}
-                    alt={authorName}
-                    width={48}
-                    height={48}
-                    className="rounded-full object-cover"
+      src={`http://localhost:8000${avatarUrl}`}
+      alt={authorName}
+      width={48}
+      height={48}
+      className="rounded-full object-cover"
                     onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+    />
+  ) : (
+    <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
                     {isEmployer ? <FaBuilding /> : <FaUser />}
-                  </div>
-                )}
+    </div>
+  )}
               </div>
             </Link>
-            <div className="flex flex-col">
+  <div className="flex flex-col">
               <Link href={profileLink}>
                 <span className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer">{authorName}</span>
               </Link>
               <span className="text-xs text-slate-500">{job.author_email}</span>
               <time className="text-sm text-slate-500">
                 Posted: {formatDate(createdIso)}
-              </time>
-            </div>
-          </header>
+    </time>
+  </div>
+</header>
 
           <div className="p-5">
             <h3 className="font-bold text-lg mb-2 text-gray-900">{job.title}</h3>
@@ -260,7 +260,7 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
                   <span>{job.location}</span>
                 </div>
               )}
-              {job.price != null && (
+            {job.price != null && (
                 <div className="flex items-center gap-3 text-gray-700">
                   <FaCoins className="text-amber-500" />
                   <span className="font-medium">Rate: {job.price} KM/h</span>
@@ -276,33 +276,59 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
           </div>
         </div>
 
-        {me?.role === "student" && (
-          <div className="px-5 pb-5 border-t border-gray-100 pt-4 flex gap-3">
-            <button
-              onClick={handleApply}
-              disabled={applying}
-              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-white font-semibold shadow-sm transition hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {applying ? "Applying..." : "Apply / Send CV"}
-            </button>
-            <button
-              onClick={handleMessage}
-              className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-white font-semibold shadow-sm transition hover:brightness-90 active:scale-[0.98] flex items-center justify-center gap-2"
-            >
-              <FaEnvelope /> Send Message
-            </button>
-          </div>
-        )}
+        <div className="p-5 border-t border-gray-100 bg-white/70 backdrop-blur-sm">
+            {!me ? (
+                <button
+                    onClick={() => router.push('/login')}
+                    className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-2 px-4 rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                    Log in or Register for More
+                </button>
+            ) : me.role === "student" ? (
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleApply}
+                        className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-2 px-4 rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                        Apply Now
+                    </button>
+                    <button
+                        onClick={handleMessage}
+                        className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 px-4 rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                        <FaEnvelope className="text-lg" />
+                        Send Message
+                    </button>
+                </div>
+            ) : me.role === "employer" && me.id === job.author_id ? (
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleEditClick}
+                        className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-2 px-4 rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                        <FaEdit className="text-lg" />
+                        Edit
+                    </button>
+                    <button
+                        onClick={handleDeleteClick}
+                        className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-4 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                        <FaTrashAlt className="text-lg" />
+                        Delete
+                    </button>
+                </div>
+            ) : null}
+        </div>
       </article>
 
-      {showModal && (
+        {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md space-y-4 relative">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md space-y-4 relative">
             <button onClick={() => setShowModal(false)} className="absolute right-4 top-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
             <h2 className="text-xl font-semibold">Apply for Job</h2>
             <p><strong>{job.title}</strong></p>
-            {me?.student_profile?.cv_url ? (
-              <div className="space-y-4">
+              {me?.student_profile?.cv_url ? (
+                <div className="space-y-4">
                 <p className="text-sm text-gray-600">Do you want to use your existing CV or upload a new one?</p>
                 <div className="flex gap-3">
                   <button
@@ -312,35 +338,35 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
                   >
                     Use Existing CV
                   </button>
-                  <button
+                    <button
                     onClick={() => setUploadNewCV(true)}
                     className="flex-1 rounded-lg border-2 border-indigo-600 px-4 py-2 text-indigo-600 font-semibold transition hover:bg-indigo-50 active:scale-[0.98]"
-                  >
+                    >
                     Upload New CV
-                  </button>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
+              ) : (
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">Please upload your CV to apply for this job.</p>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
                   onChange={(e) => setSelectedFile(e.target.files[0])}
                   className="w-full"
-                />
-                <button
-                  onClick={() => confirmApply(false)}
+                  />
+                  <button
+                    onClick={() => confirmApply(false)}
                   disabled={applying || !selectedFile}
                   className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-white font-semibold shadow-sm transition hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-60"
-                >
+                  >
                   {applying ? "Applying..." : "Submit Application"}
-                </button>
-              </div>
-            )}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {showInsightModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
