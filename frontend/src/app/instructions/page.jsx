@@ -6,6 +6,10 @@ import Footer from '@/components/Footer';
 import InstructionCard from "@/components/InstructionCard";
 import { listInstructions, createInstruction, deleteInstruction } from "@/utils/api/instructions";
 import { getMe } from "@/utils/api/auth";
+import UserProfilePopup from "@/components/UserProfileCard";
+
+
+
 
 export default function InstructionsPage() {
   const [rows, setRows] = useState([]);
@@ -13,6 +17,7 @@ export default function InstructionsPage() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [me, setMe] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null); 
 
   const [form, setForm] = useState({
     title: "",
@@ -93,6 +98,7 @@ export default function InstructionsPage() {
                     setRows((prev) => prev.filter((instruction) => instruction.id !== id));
                   }
                 }}
+                onProfileClick={(userId) => setSelectedUserId(userId)}
               />
             ))}
           </div>
@@ -100,6 +106,14 @@ export default function InstructionsPage() {
         
       </main>
       <Footer />
+
+          {selectedUserId && (
+        <UserProfilePopup
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
+        />
+      )}
+
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">

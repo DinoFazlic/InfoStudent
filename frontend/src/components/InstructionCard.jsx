@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
 
 
-export default function InstructionCard({ instruction, onSaveToggle }) {
+export default function InstructionCard({ instruction, onSaveToggle , onProfileClick }) {
   const [hidden, setHidden] = useState(false);
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [me, setMe] = useState(null);
@@ -94,31 +94,42 @@ export default function InstructionCard({ instruction, onSaveToggle }) {
       )}
 
       {/* Header */}
-      <header className="flex items-center gap-3 p-5">
-  {avatarUrl ? (
-    <img
-      src={`http://localhost:8000${avatarUrl}`}
-      alt={authorName}
-      width={48}
-      height={48}
-      className="rounded-full object-cover"
-      onError={(e) => {
-        e.target.onerror = null;
-        e.target.src = "/default-avatar.png";  // You can put your default avatar in /public
-      }}
-    />
-  ) : (
-    <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-      {authorName.slice(0, 1).toUpperCase()}
-    </div>
-  )}
-  <div className="flex flex-col">
-    <span className="font-semibold">{authorName}</span>
-    <time className="text-sm text-slate-600">
-      {createdIso ? new Date(createdIso).toLocaleDateString("en-GB") : "--"}
-    </time>
-  </div>
-</header>
+     <header className="flex items-center gap-3 p-5">
+      {avatarUrl ? (
+        <img
+          src={`http://localhost:8000${avatarUrl}`}
+          alt={authorName}
+          width={48}
+          height={48}
+          className="rounded-full object-cover cursor-pointer"
+          onClick={() => onProfileClick?.(instruction.createdBy)}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "/default-avatar.png";
+          }}
+        />
+      ) : (
+        <div
+          className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600 cursor-pointer"
+          onClick={() => onProfileClick?.(instruction.createdBy)}
+        >
+          {authorName.slice(0, 1).toUpperCase()}
+        </div>
+      )}
+      <div className="flex flex-col">
+        <button 
+        onClick={() => onProfileClick?.(instruction.createdBy)}
+
+          className="font-semibold text-left text-blue-700 hover:underline focus:outline-none"
+        >
+          {authorName}
+        </button>
+
+        <time className="text-sm text-slate-600">
+          {createdIso ? new Date(createdIso).toLocaleDateString("en-GB") : "--"}
+        </time>
+      </div>
+    </header>
 
 
       {/* Instruction Details */}
@@ -138,6 +149,8 @@ export default function InstructionCard({ instruction, onSaveToggle }) {
           )}
         </div>
       </div>
+
+      
 
       {/* Buttons (Students Only) */}
       {me?.role === "student" && (
