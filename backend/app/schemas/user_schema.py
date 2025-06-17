@@ -1,3 +1,4 @@
+from datetime import time
 from pydantic import BaseModel, EmailStr, constr
 from typing import Literal, Optional, List
 
@@ -100,6 +101,36 @@ class UpdateEmployerProfileRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     user: UserRead
+
+    class Config:
+        from_attributes = True
+
+class AvailabilityEntry(BaseModel):
+    day: str
+    start_time: time
+    end_time: time
+
+    class Config:
+        from_attributes = True
+
+class UserFullProfile(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: EmailStr
+    role: str
+    city: Optional[str]
+    contact_phone: Optional[str]
+    profile_photo_url: Optional[str]
+
+    # student dodatno
+    biography: Optional[str]
+    skills: Optional[List[str]]
+    experience: Optional[str]
+    cv_url: Optional[str]
+
+    # NOVO
+    availability: Optional[List[AvailabilityEntry]] = None
 
     class Config:
         from_attributes = True
