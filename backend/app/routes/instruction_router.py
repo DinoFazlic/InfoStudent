@@ -1,10 +1,10 @@
 # app/routes/instruction_router.py
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db, get_current_user_optional, get_current_user
 from app.models.instruction        import Instruction, InstructionSave
 from app.models.users              import User
 from app.schemas.instruction_schema import InstructionCreate, InstructionRead, InstructionUpdate
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/instructions", tags=["instructions"])
 
 # ─────────────────────────────── GET /api/instructions ─────────────────────────
 @router.get("", response_model=List[InstructionRead])
-def list_instructions(db: Session = Depends(get_db),user = Depends(get_current_user),):
+def list_instructions(db: Session = Depends(get_db), user: Optional[User] = Depends(get_current_user_optional),):
 
     rows = db.query(Instruction).order_by(Instruction.created_at.desc()).all()
     out: List[InstructionRead] = []
@@ -36,7 +36,7 @@ def list_instructions(db: Session = Depends(get_db),user = Depends(get_current_u
         if inst.id in saved_instruction_ids:
             continue
 
-        user: User | None = db.get(User, inst.created_by)
+        user: Optional[User] = db.get(User, inst.created_by)
 
         # ------- siguran fallback za ime + avatar -----------
         author_name   = ((user.first_name or "") + " " + (user.last_name or "")).strip() if user else None
@@ -103,7 +103,7 @@ def delete_instruction(
     """
     Delete instruction only if the logged-in user is the creator.
     """
-    instruction = db.get(Instruction, instruction_id)
+    instruction: Optional[Instruction] = db.get(Instruction, instruction_id)
     if not instruction:
         raise HTTPException(status_code=404, detail="Instruction not found.")
 
@@ -124,7 +124,7 @@ def update_instruction(
 ):
     """Update an instruction owned by the current user (or admin)."""
 
-    instruction: Instruction | None = db.get(Instruction, instruction_id)
+    instruction: Optional[Instruction] = db.get(Instruction, instruction_id)
     if not instruction:
         raise HTTPException(status_code=404, detail="Instruction not found.")
 

@@ -5,10 +5,10 @@ import NavBar from "@/components/Navbar";
 import Footer from '@/components/Footer';
 import InternshipCard from "@/components/InternshipCard";
 import { listInternships, createInternship } from "@/utils/api/internships";
-
 import { getMe } from "@/utils/api/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 export default function InternshipsPage() {
   const [items, setItems] = useState([]);
@@ -164,7 +164,18 @@ export default function InternshipsPage() {
         {loading ? (
           <p className="text-center text-slate-600">Loading…</p>
         ) : items.length === 0 ? (
-          <p className="text-center text-slate-600">No internships posted yet.</p>
+          <div className="text-center py-12">
+            <div className="max-w-md mx-auto">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">No internships available</h3>
+              <p className="text-gray-600 mb-6">Sign in or register to access more features and find internship opportunities.</p>
+              <Link 
+                href="/login" 
+                className="inline-flex items-center px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                Login or Register
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {items

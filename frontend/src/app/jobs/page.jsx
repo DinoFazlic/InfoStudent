@@ -6,6 +6,7 @@ import NavBar from "@/components/Navbar";
 import Footer from '@/components/Footer';
 import { listJobs, createJob, deleteJob } from "@/utils/api/jobs";
 import { getMe } from "@/utils/api/auth";
+import Link from "next/link";
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
@@ -28,11 +29,16 @@ export default function JobsPage() {
       const user = await getMe().catch(() => null);
       console.log("Logged-in user:", user); // Debug user
       setMe(user);
-      const allJobs = await listJobs().catch(() => []);
+      const allJobs = await listJobs().catch((err) => {
+        console.error("Error fetching jobs:", err);
+        return [];
+      });
+      console.log("All jobs fetched:", allJobs); // Debug jobs
       const visibleJobs = user?.role === "student"
         ? allJobs.filter((job) => !job.applied)
         : allJobs; // Employers/Admins see all jobs
 
+      console.log("Visible jobs:", visibleJobs); // Debug visible jobs
       setJobs(visibleJobs);
       setLoading(false);
     })();
@@ -104,7 +110,18 @@ export default function JobsPage() {
         {loading ? (
           <p className="text-center text-slate-600">Loading…</p>
         ) : jobs.length === 0 ? (
-          <p className="text-center text-slate-600">No job postings available.</p>
+          <div className="text-center py-12">
+            <div className="max-w-md mx-auto">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">No job postings available</h3>
+              <p className="text-gray-600 mb-6">Sign in or register to access more features and apply for jobs.</p>
+              <Link 
+                href="/login" 
+                className="inline-flex items-center px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                Login or Register
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((j) => (
