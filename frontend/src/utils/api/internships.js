@@ -1,7 +1,9 @@
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export async function listInternships() {
-  const r = await fetch(`${BASE}/api/internships`, { credentials: "include" });
+  const r = await fetch(`${BASE}/api/internships`, {
+    credentials: "include"
+  });
   if (!r.ok) throw new Error("Fetch internships failed: " + r.status);
   return r.json();
 }
@@ -23,5 +25,45 @@ export async function deleteInternship(id) {
     credentials: "include",
   });
   if (!r.ok) throw new Error("Delete internship failed: " + r.status);
+  return r.json();
 }
+
+export const updateInternship = async (id, internshipData) => {
+  const response = await fetch(`${BASE}/api/internships/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(internshipData),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update internship");
+  }
+  return response.json();
+};
+
+export const saveInternship = async (internshipId) => {
+  const response = await fetch(`${BASE}/api/internship-saves`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ internship_id: internshipId }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to save internship");
+  }
+};
+
+export const unsaveInternship = async (internshipId) => {
+  const response = await fetch(`${BASE}/api/internship-saves/${internshipId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to unsave internship");
+  }
+};
 

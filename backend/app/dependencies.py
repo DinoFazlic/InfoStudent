@@ -13,6 +13,7 @@ __all__ = [
     "get_current_user",
     "get_current_student",
     "get_current_employer",
+    "get_current_user_optional",
 ]
 
 async def get_current_user_optional(

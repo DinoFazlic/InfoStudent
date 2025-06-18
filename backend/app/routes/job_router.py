@@ -1,8 +1,8 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db, get_current_user_optional, get_current_user
 from app.models.job import Job, JobApplication, JobSave
 from app.models.users import User
 from app.schemas.job_schema import JobCreate, JobRead
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 @router.get("", response_model=list[JobRead])
 def list_jobs(
     db: Session = Depends(get_db),
-    user = Depends(get_current_user),
+    user: Optional[User] = Depends(get_current_user_optional),
 ):
     rows = db.query(Job).order_by(Job.created_at.desc()).all()
 
@@ -20,8 +20,7 @@ def list_jobs(
     applied_job_ids = set()
     saved_job_ids = set()
 
-
-    if user.role == "student":
+    if user and user.role == "student":
         # Get job IDs the student applied to
         applied_job_ids = {
             job_id for (job_id,) in db.query(JobApplication.job_id).filter(

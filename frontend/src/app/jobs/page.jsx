@@ -6,6 +6,7 @@ import NavBar from "@/components/Navbar";
 import Footer from '@/components/Footer';
 import { listJobs, createJob, deleteJob } from "@/utils/api/jobs";
 import { getMe } from "@/utils/api/auth";
+import Link from "next/link";
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
@@ -28,11 +29,16 @@ export default function JobsPage() {
       const user = await getMe().catch(() => null);
       console.log("Logged-in user:", user); // Debug user
       setMe(user);
-      const allJobs = await listJobs().catch(() => []);
+      const allJobs = await listJobs().catch((err) => {
+        console.error("Error fetching jobs:", err);
+        return [];
+      });
+      console.log("All jobs fetched:", allJobs); // Debug jobs
       const visibleJobs = user?.role === "student"
         ? allJobs.filter((job) => !job.applied)
         : allJobs; // Employers/Admins see all jobs
 
+      console.log("Visible jobs:", visibleJobs); // Debug visible jobs
       setJobs(visibleJobs);
       setLoading(false);
     })();
@@ -81,38 +87,41 @@ export default function JobsPage() {
 
   // ────────── render ──────────
   return (
-    <div className="min-h-screen flex flex-col bg-[url('/backgrounds/chat-bg.png')] bg-cover bg-fixed">
+    <div className="min-h-screen flex flex-col bg-white">
       <NavBar />
 
-      <div className="flex-1 container mx-auto px-4 pt-6 pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Job Listings</h1>
+      <div className="container mx-auto flex-1 px-4 pt-6 pb-10">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-amber-600">Job Listings</h1>
 
-
-          {/* Only show button when me is loaded */}
           {!loading && (me?.role === "employer" || me?.role === "admin") && (
             <button
-            onClick={() => {
-              setForm({ title: "", description: "", location: "", price: "" });
-              setShowModal(true);
-            }}
-            className="flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-white text-base font-semibold hover:bg-emerald-700"
-          >
-            <span className="text-lg flex items-center justify-center">
-              +
-            </span>
-            Add Job
-          </button>
-
-
+              onClick={() => {
+                setForm({ title: "", description: "", location: "", price: "" });
+                setShowModal(true);
+              }}
+              className="flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-white text-base font-semibold hover:bg-amber-600"
+            >
+              <span className="text-lg flex items-center justify-center">+</span> Add Job
+            </button>
           )}
         </div>
 
-        {/* Jobs list */}
         {loading ? (
-          <p className="text-center text-slate-700">Loading jobs…</p>
+          <p className="text-center text-slate-600">Loading…</p>
         ) : jobs.length === 0 ? (
-          <p className="text-center text-slate-700">No job postings available.</p>
+          <div className="text-center py-12">
+            <div className="max-w-md mx-auto">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">No job postings available</h3>
+              <p className="text-gray-600 mb-6">Sign in or register to access more features and apply for jobs.</p>
+              <Link 
+                href="/login" 
+                className="inline-flex items-center px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                Login or Register
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((j) => (
@@ -132,7 +141,6 @@ export default function JobsPage() {
                     setJobs((prev) => prev.filter((job) => job.id !== id));
                   }
                 }}
-
               />
             ))}
           </div>
