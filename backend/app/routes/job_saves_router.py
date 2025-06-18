@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_db, get_current_student
 from app.models.job import JobSave
 from pydantic import BaseModel
-
+from app.models.job import Job, JobSave
+from app.models.users import User
+from app.schemas.job_schema import JobRead
+from typing import List
 
 router = APIRouter(prefix="/api/job-saves", tags=["Job Saves"])
 
@@ -41,3 +44,22 @@ def unsave_job(
     db.delete(job_save)
     db.commit()
     return
+
+@router.get("", response_model=List[JobRead])
+def get_saved_jobs(
+    db: Session = Depends(get_db),
+    student = Depends(get_current_student)
+):
+    saves = db.query(JobSave).filter_by(student_id=student.id).all()
+    jobs = [db.get(Job, s.job_id) for s in saves]
+    result = []
+    for job in jobs:
+        if job is None: continue
+        author = db.get(User, job.created_by)
+        data = job.model_dump()
+        data["author_name"] = f"{(author.first_name or '')} {(author.last_name or '')}".strip() or author.email
+        data["author_avatar_url"] = author.profile_photo_url
+        data["applied"] = False
+        data["saved"] = True
+        result.append(JobRead.model_validate(data))
+    return result

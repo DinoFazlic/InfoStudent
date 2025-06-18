@@ -70,33 +70,47 @@ function EmployerProfile() {
         .catch(console.error);
     }
 
-    if (activeSection === "posts" && !dataLoaded.posts) {
-      const simulateFetch = (label) =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve([
-              {
-                id: 1,
-                title: `${label} Post 1`,
-                description: `This is a ${label.toLowerCase()} opportunity.`,
-              },
-              {
-                id: 2,
-                title: `${label} Post 2`,
-                description: `Another great ${label.toLowerCase()} post.`,
-              },
-            ]);
-          }, 500);
-        });
-
+    if (activeSection === "posts" && !dataLoaded.posts && profile?.id) {
       Promise.all([
-        simulateFetch("Job"),
-        simulateFetch("Instruction"),
-        simulateFetch("Internship"),
-      ]).then(([jobs, instructions, internships]) => {
-        setEmployerPosts({ jobs, instructions, internships });
-        setDataLoaded((prev) => ({ ...prev, posts: true }));
-      });
+        fetch("http://localhost:8000/api/jobs", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/internships", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/instructions", { credentials: "include" }).then(res => res.json()),
+      ])
+        .then(([allJobs, allInternships, allInstructions]) => {
+          const fullName = profile.first_name + " " + profile.last_name;
+          const photoUrl = profile.profile_photo_url || null;
+
+          const jobs = allJobs
+            .filter(post => post.created_by === profile.id)
+            .map(post => ({
+              ...post,
+              authorName: fullName,
+              authorAvatarUrl: photoUrl,
+              createdAt: post.created_at,
+            }));
+
+          const internships = allInternships
+            .filter(post => post.created_by === profile.id)
+            .map(post => ({
+              ...post,
+              authorName: fullName,
+              authorAvatarUrl: photoUrl,
+              createdAt: post.created_at,
+            }));
+
+          const instructions = allInstructions
+            .filter(post => post.created_by === profile.id)
+            .map(post => ({
+              ...post,
+              authorName: fullName,
+              authorAvatarUrl: photoUrl,
+              createdAt: post.created_at,
+            }));
+
+          setEmployerPosts({ jobs, internships, instructions });
+          setDataLoaded((prev) => ({ ...prev, posts: true }));
+        })
+        .catch(console.error);
     }
   }, [activeSection, dataLoaded]);
 
@@ -220,7 +234,12 @@ function EmployerProfile() {
       case "reviewsGiven":
         return <EmployerReviewsGivenSection reviewsGiven={reviewsGiven} />;
       case "posts":
-        return <EmployerPostsSection posts={employerPosts} />;
+        return (
+          <EmployerPostsSection
+            posts={employerPosts}
+            setEmployerPosts={setEmployerPosts}
+          />
+        );
       default:
         return null;
     }

@@ -94,7 +94,7 @@ function EmployerSidebar({
 
       <button
         onClick={handleLogout}
-        className="ring-1 w-[80%] bg-none border-none text-left text-[1.1rem] text-red-500 py-1.5 px-4 mt-10 flex items-center gap-2 rounded-lg transition duration-200 hover:bg-red-100 cursor-pointer"
+        className="ring-1 w-[80%] bg-none border-none text-left text-[1.1rem] text-red-500 py-1.5 px-4 mt-1.5 flex items-center gap-2 rounded-lg transition duration-200 hover:bg-red-100 cursor-pointer"
       >
         <FiLogOut /> Logout
       </button>

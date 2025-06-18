@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from app.dependencies import get_db, get_current_student
 from app.models.internship import InternshipSave
 from app.models import User
+from app.models import Internship
+from app.schemas.internship_schema import InternshipRead
+from typing import List
 
 router = APIRouter(prefix="/api/internship-saves", tags=["Internship Saves"])
 
@@ -52,3 +55,23 @@ def unsave_internship(
 
     db.delete(save)
     db.commit()
+
+@router.get("", response_model=List[InternshipRead])
+def get_saved_internships(
+    db: Session = Depends(get_db),
+    student = Depends(get_current_student)
+):
+    saves = db.query(InternshipSave).filter_by(student_id=student.id).all()
+    internships = [db.get(Internship, s.internship_id) for s in saves]
+    result = []
+    for internship in internships:
+        if internship is None:
+            continue
+        author = db.get(User, internship.created_by)
+        data = internship.model_dump()
+        data["author_name"] = f"{(author.first_name or '')} {(author.last_name or '')}".strip() or author.email
+        data["author_avatar_url"] = author.profile_photo_url
+        data["applied"] = False
+        data["saved"] = True
+        result.append(InternshipRead.model_validate(data))
+    return result

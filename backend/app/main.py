@@ -14,10 +14,11 @@ from app.websocket.chat_socket import websocket_chat
 from app.routes.internship_router import router as internship_router
 from app.routes import job_application_router
 from app.routes import job_saves_router
-from app.controllers import ai_controller
+from app.controllers import ai_controller, application_controller
 from app.routes.internship_application_router import router as internship_application_router
 from app.routes.internship_save_router import router as internship_save_router
 from app.routes import instruction_save_router
+from app.routes.application_router import router as application_router
 
 
 
@@ -49,7 +50,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # ───── KREIRANJE SVIH TABLICA ─────────────────────────────────────────────────
 
-SQLModel.metadata.create_all(bind=engine)
+#SQLModel.metadata.create_all(bind=engine)
 
 # ───── WEBSOCKET ZA CHAT ──────────────────────────────────────────────────────
 active_connections: dict[int, WebSocket] = {}
@@ -73,4 +74,5 @@ app.include_router(ai_controller.router)
 app.include_router(internship_application_router)
 app.include_router(internship_save_router)
 app.include_router(instruction_save_router.router)
+app.include_router(application_router)
 

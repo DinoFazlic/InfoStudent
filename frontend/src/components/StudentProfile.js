@@ -23,13 +23,16 @@ function StudentProfile() {
   const [appliedInstructions, setAppliedInstructions] = useState([]);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleData, setScheduleData] = useState([]);
-
+  const [savedJobs, setSavedJobs] = useState([]);
+  const [savedInternships, setSavedInternships] = useState([]);
+  const [savedInstructions, setSavedInstructions] = useState([]);
   const [dataLoaded, setDataLoaded] = useState({
     profile: true,
     myReviews: false,
     reviewsHistory: false,
     instructionPosts: false,
     myApplications: false,
+    savedPosts: false,
   });
 
   const fetchProfile = async () => {
@@ -74,37 +77,114 @@ function StudentProfile() {
         .catch((err) => console.error("Failed to fetch given reviews:", err));
     }
   }, [activeSection, dataLoaded]);
+  
+  useEffect(() => {
+    if (activeSection === "savedPosts" && !dataLoaded.savedPosts) {
+      Promise.all([
+        fetch("http://localhost:8000/api/job-saves", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/internship-saves", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/instruction-saves", { credentials: "include" }).then(res => res.json()),
+      ])
+        .then(([jobs, internships, instructions]) => {
+          setSavedJobs(jobs);
+          setSavedInternships(internships);
+          setSavedInstructions(instructions);
+          setDataLoaded(prev => ({ ...prev, savedPosts: true }));
+        })
+        .catch(err => console.error("Failed to fetch saved posts:", err));
+    }
+  }, [activeSection, dataLoaded, profile?.id]);
 
   useEffect(() => {
-    if (activeSection === "myInstructionPosts" && !dataLoaded.instructionPosts) {
-      const mockInstructions = [
-        { id: 1, title: "Math Tutor", description: "Helping with calculus basics." },
-        { id: 2, title: "Physics Help", description: "Newton's laws and energy." },
-      ];
-      setInstructionPosts(mockInstructions);
-      setDataLoaded((prev) => ({ ...prev, instructionPosts: true }));
+    if (activeSection === "myInstructionPosts" && !dataLoaded.instructionPosts && profile?.id) {
+      fetch("http://localhost:8000/api/instructions", {
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((allInstructions) => {
+          const myPosts = allInstructions
+            .filter(post => post.created_by === profile.id)
+            .map(post => ({
+              ...post,
+              authorName: profile.first_name + " " + profile.last_name,
+              authorAvatarUrl: profile.profile_photo_url || null,
+              createdAt: post.created_at,
+            }));
+          setInstructionPosts(myPosts);
+          setDataLoaded(prev => ({ ...prev, instructionPosts: true }));
+        })
+        .catch(err => console.error("Failed to fetch instruction posts:", err));
     }
 
-    if (activeSection === "myApplications" && !dataLoaded.myApplications) {
-      const mockJobs = [
-        { id: 1, title: "Store Assistant", description: "Part-time help in local shop." },
-      ];
-      const mockInternships = [
-        { id: 2, title: "Web Dev Intern", description: "Frontend work for NGO." },
-      ];
-      const mockInstructions = [
-        { id: 3, title: "Chemistry Sessions", description: "Helping high school students." },
-        { id: 4, title: "Chemistry Sessions", description: "Helping high school students." },
-        { id: 5, title: "Chemistry Sessions", description: "Helping high school students." },
-        { id: 36, title: "Chemistry Sessions", description: "Helping high school students." },
-      ];
+    if (activeSection === "myApplications" && !dataLoaded.myApplications && profile?.id) {
+      Promise.all([
+        fetch("http://localhost:8000/api/jobs", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/internships", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/instructions", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/job-saves", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/internship-saves", { credentials: "include" }).then(res => res.json()),
+        fetch("http://localhost:8000/api/instruction-saves", { credentials: "include" }).then(res => res.json()),
+      ])
+        .then(([allJobs, allInternships, allInstructions, savedJobsRes, savedInternshipsRes, savedInstructionsRes]) => {
+          setAppliedJobs(
+            allJobs
+              .filter(post => post.applied)
+              .map(post => ({
+                ...post,
+                authorName: post.author_name || "Unknown",
+                authorAvatarUrl: post.author_avatar_url || null,
+                createdAt: post.created_at,
+              }))
+          );
 
-      setAppliedJobs(mockJobs);
-      setAppliedInternships(mockInternships);
-      setAppliedInstructions(mockInstructions);
-      setDataLoaded((prev) => ({ ...prev, myApplications: true }));
+          setAppliedInternships(
+            allInternships
+              .filter(post => post.applied)
+              .map(post => ({
+                ...post,
+                authorName: post.author_name || "Unknown",
+                authorAvatarUrl: post.author_avatar_url || null,
+                createdAt: post.created_at,
+              }))
+          );
+
+          setAppliedInstructions(
+            allInstructions
+              .filter(post => post.applied)
+              .map(post => ({
+                ...post,
+                authorName: post.author_name || "Unknown",
+                authorAvatarUrl: post.author_avatar_url || null,
+                createdAt: post.created_at,
+              }))
+          );
+
+          setSavedJobs(savedJobsRes.map(post => ({
+            ...post,
+            authorName: post.author_name || "Unknown",
+            authorAvatarUrl: post.author_avatar_url || null,
+            createdAt: post.created_at,
+          })));
+
+          setSavedInternships(savedInternshipsRes.map(post => ({
+            ...post,
+            authorName: post.author_name || "Unknown",
+            authorAvatarUrl: post.author_avatar_url || null,
+            createdAt: post.created_at,
+          })));
+
+          setSavedInstructions(savedInstructionsRes.map(post => ({
+            ...post,
+            authorName: post.author_name || "Unknown",
+            authorAvatarUrl: post.author_avatar_url || null,
+            createdAt: post.created_at,
+          })));
+
+          setDataLoaded(prev => ({ ...prev, myApplications: true }));
+        })
+        .catch(err => console.error("Failed to fetch applied/saved posts:", err));
     }
-  }, [activeSection, dataLoaded]);
+  }, [activeSection, dataLoaded, profile?.id]);
 
   const handleLogout = () => {
     fetch("http://localhost:8000/auth/logout", {
@@ -292,13 +372,24 @@ function StudentProfile() {
       case "reviewsHistory":
         return <StudentReviewsGivenSection reviewsGiven={reviewsGiven} />;
       case "myInstructionPosts":
-        return <StudentInstructionPostsSection posts={instructionPosts} />;
+        return (
+          <StudentInstructionPostsSection
+            posts={instructionPosts}
+            setInstructionPosts={setInstructionPosts}
+          />
+        );
       case "myApplications":
         return (
           <StudentAppliedPostsSection
-            jobs={appliedJobs}
-            internships={appliedInternships}
-            instructions={appliedInstructions}
+            appliedJobs={appliedJobs}
+            appliedInternships={appliedInternships}
+            appliedInstructions={appliedInstructions}
+            savedJobs={savedJobs}
+            savedInternships={savedInternships}
+            savedInstructions={savedInstructions}
+            setSavedJobs={setSavedJobs}
+            setSavedInternships={setSavedInternships}
+            setSavedInstructions={setSavedInstructions}
           />
         );
       default:
