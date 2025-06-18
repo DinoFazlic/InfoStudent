@@ -6,7 +6,7 @@ import axios from "axios";
 import { getMe } from "@/utils/api/auth";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
-import { FaEdit, FaTrashAlt, FaEnvelope, FaPhoneAlt, FaRegCalendarCheck, FaBookmark, FaRegBookmark, FaGraduationCap, FaClock } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaEnvelope, FaPhoneAlt, FaBookmark, FaRegBookmark, FaGraduationCap, FaClock } from 'react-icons/fa';
 
 export default function InstructionCard({ instruction, onSaveToggle, onEdit, onDelete }) {
   const [hidden, setHidden] = useState(false);
@@ -169,18 +169,10 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
           </button>
         ) : me.role === "student" ? (
           <div className="flex gap-3">
-            {instruction.author_schedule_url && (
-              <button
-                onClick={() => window.open(`http://localhost:8000${instruction.author_schedule_url}`, '_blank')}
-                className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-white font-semibold shadow-sm transition hover:bg-green-500 active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                <FaRegCalendarCheck /> Schedule
-              </button>
-            )}
             <button
               onClick={handleMessage}
               disabled={messaging}
-              className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-white font-semibold shadow-sm transition hover:brightness-90 active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-white font-semibold shadow-sm transition hover:brightness-90 active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <FaEnvelope /> Send Message
             </button>
