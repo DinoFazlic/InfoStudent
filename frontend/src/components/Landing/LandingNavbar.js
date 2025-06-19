@@ -27,9 +27,9 @@ export default function LandingNavbar() {
         </Link>
 
         <div className="hidden  md:flex items-center gap-6 text-gray-700 font-medium">
-          <Link href="/landing/jobs" className="nav-link-underline transition">Jobs</Link>
-          <Link href="/landing/instructions" className="nav-link-underline transition">Instructions</Link>
-          <Link href="/landing/internships" className="nav-link-underline transition">Internships</Link>
+          <Link href="/jobs" className="nav-link-underline transition">Jobs</Link>
+          <Link href="/instructions" className="nav-link-underline transition">Instructions</Link>
+          <Link href="/internships" className="nav-link-underline transition">Internships</Link>
 
           <Link href="/login">
             <button className="px-4 py-2 bg-cyan-900 text-white rounded hover:bg-cyan-700 transition">

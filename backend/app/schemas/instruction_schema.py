@@ -32,6 +32,18 @@ class InstructionRead(InstructionBase):
     # polja koja *mi* dodajemo u routeru
     author_name:       Optional[str] = Field(default=None, description="Ime i prezime kreatora")
     author_avatar_url: Optional[str] = Field(default=None, description="URL na profilnu")
+    author_email:      Optional[str] = Field(default=None)
+    author_phone:      Optional[str] = Field(default=None)
+    author_schedule_url: Optional[str] = Field(default=None)
+    
+    company_name: Optional[str] = Field(default=None, description="Naziv firme ako je employer")
 
+    
     class Config:
         from_attributes = True
+
+
+# ──────────────────────── Update (PUT/PATCH) ─────────────────────
+class InstructionUpdate(InstructionBase):
+    """Polja koja klijent smije poslati prilikom izmjene."""
+    pass

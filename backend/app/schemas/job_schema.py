@@ -28,3 +28,13 @@ class JobRead(JobBase):
 
     class Config:
         from_attributes = True
+
+class JobUpdate(SQLModel):
+    title: Optional[str]
+    description: Optional[str]
+    location: Optional[str]
+    price: Optional[float]
+    application_deadline: Optional[date]
+    start_date: Optional[date]
+    end_date: Optional[date]
+    contact_info: Optional[str]

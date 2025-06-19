@@ -1,19 +1,15 @@
-# app/schemas/internship_schema.py
-from typing import Optional
-from datetime import datetime, date
 from pydantic import BaseModel
+from typing import Optional, List
+from datetime import date, datetime
 
-
-# --------- shared fields ---------
 class InternshipBase(BaseModel):
     title: str
     description: str
-    company: Optional[str] = None
     location: Optional[str] = None
     stipend: Optional[float] = None
-    contact_email: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    application_deadline: Optional[date] = None
 
 
 class InternshipCreate(InternshipBase):
@@ -22,11 +18,27 @@ class InternshipCreate(InternshipBase):
 
 class InternshipRead(InternshipBase):
     id: int
-    created_by: int
     posted_at: datetime
-    author_name: Optional[str] = None
+
+   
+    author_id: int
+    author_role: str
+    author_first_name: Optional[str] = None
+    author_last_name: Optional[str] = None
+    author_email: Optional[str] = None
     author_avatar_url: Optional[str] = None
-    applied: Optional[bool] = False
+    company_name: Optional[str] = None
+    company_email: Optional[str] = None
+    author_name: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+   
+    applied: bool = False
     saved: bool = False
 
-    model_config = {"from_attributes": True}
+    class Config:
+        from_attributes = True
+
+class InternshipUpdate(InternshipBase):
+    
+    pass

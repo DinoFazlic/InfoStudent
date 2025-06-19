@@ -73,5 +73,7 @@ def get_saved_internships(
         data["author_avatar_url"] = author.profile_photo_url
         data["applied"] = False
         data["saved"] = True
+        data["author_id"] = internship.created_by
+        data["author_role"] = author.role
         result.append(InternshipRead.model_validate(data))
     return result

@@ -62,9 +62,9 @@ export default function LandingPage() {
           <p className="text-gray-600 mt-2">Browse through flexible jobs, internships, and knowledge-sharing opportunities tailored for students.</p>
         </div>
         <div className="max-w-6xl mx-auto grid gap-8 grid-cols-1 sm:grid-cols-3">
-          <FeatureCard title="Jobs" description="Flexible student jobs near you." href="/landing/jobs"/>
-          <FeatureCard title="Internships" description="Gain experience through professional internships."  href="/landing/internships/"/>
-          <FeatureCard title="Instructions" description="Help others and earn by giving lessons."  href="/landing/instructions/"/>
+          <FeatureCard title="Jobs" description="Flexible student jobs near you." href="/jobs"/>
+          <FeatureCard title="Internships" description="Gain experience through professional internships."  href="/internships"/>
+          <FeatureCard title="Instructions" description="Help others and earn by giving lessons."  href="/instructions"/>
         </div>
       </section>
 

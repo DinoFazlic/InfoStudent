@@ -88,9 +88,12 @@ function EmployerProfile() {
               authorAvatarUrl: photoUrl,
               createdAt: post.created_at,
             }));
-
+            
           const internships = allInternships
-            .filter(post => post.created_by === profile.id)
+            .filter(post => {
+              console.log("Comparing:", post.author_id, "vs", profile.id);
+              return post.author_id === profile.id;
+            })
             .map(post => ({
               ...post,
               authorName: fullName,

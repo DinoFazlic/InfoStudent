@@ -6,13 +6,18 @@ import Footer from '@/components/Footer';
 import InstructionCard from "@/components/InstructionCard";
 import { listInstructions, createInstruction, deleteInstruction } from "@/utils/api/instructions";
 import { getMe } from "@/utils/api/auth";
+import UserProfilePopup from "@/components/UserProfileCard";
+import Link from "next/link";
 
 export default function InstructionsPage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [me, setMe] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null); 
 
   const [form, setForm] = useState({
     title: "",
@@ -32,10 +37,24 @@ export default function InstructionsPage() {
   }, []);
 
   async function handleDelete(id) {
-    if (!confirm("Delete this instruction?")) return;
     await deleteInstruction(id);
     setRows(rows.filter(r => r.id !== id));
   }
+
+  const handleEdit = (id) => {
+    const inst = rows.find(r => r.id === id);
+    if (!inst) return;
+    setForm({
+      title: inst.title,
+      subject: inst.subject ?? "",
+      description: inst.description,
+      hourly_rate: inst.hourly_rate ?? "",
+      contact_info: inst.contact_info ?? "",
+    });
+    setIsEditMode(true);
+    setCurrentId(id);
+    setShowModal(true);
+  };
 
   const onField = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -48,13 +67,26 @@ export default function InstructionsPage() {
       if (payload.contact_info === "") delete payload.contact_info;
       if (payload.subject === "") delete payload.subject;
 
+      if (isEditMode && currentId) {
+        const updated = await (await import("@/utils/api/instructions")).updateInstruction(currentId, payload);
+        setRows(prev => prev.map(r => r.id === currentId ? updated : r));
+      } else {
       const created = await createInstruction(payload);
-      setRows([created, ...rows]);
+        setRows(prev => [created, ...prev]);
+      }
       setShowModal(false);
+      setIsEditMode(false);
+      setCurrentId(null);
     } finally {
       setSaving(false);
     }
   }
+
+  const resetForm = () => {
+    setForm({ title: "", subject: "", description: "", hourly_rate: "", contact_info: "" });
+    setIsEditMode(false);
+    setCurrentId(null);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -64,7 +96,7 @@ export default function InstructionsPage() {
           <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
           <button
             onClick={() => {
-              setForm({ title: "", subject: "", description: "", hourly_rate: "", contact_info: "" });
+              resetForm();
               setShowModal(true);
             }}
             className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700"
@@ -74,9 +106,20 @@ export default function InstructionsPage() {
         </div>
 
         {loading ? (
-          <p className="text-center text-slate-700">Loading instructions…</p>
+          <p className="text-center text-slate-600">Loading…</p>
         ) : rows.length === 0 ? (
-          <p className="text-center text-slate-700">No instructions available.</p>
+          <div className="text-center py-12">
+            <div className="max-w-md mx-auto">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">No instructions available</h3>
+              <p className="text-gray-600 mb-6">Sign in or register to access more features and find instruction opportunities.</p>
+              <Link 
+                href="/login" 
+                className="inline-flex items-center px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                Login or Register
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {rows.map(r => (
@@ -85,7 +128,6 @@ export default function InstructionsPage() {
                 instruction={{
                   ...r,
                   canDelete: me && (me.role === "admin" || me.id === r.created_by),
-                  onDelete: handleDelete,
                   createdBy: r.created_by,
                 }}
                 onSaveToggle={(id, nowSaved) => {
@@ -93,6 +135,9 @@ export default function InstructionsPage() {
                     setRows((prev) => prev.filter((instruction) => instruction.id !== id));
                   }
                 }}
+                onProfileClick={(userId) => setSelectedUserId(userId)}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
               />
             ))}
           </div>
@@ -100,18 +145,26 @@ export default function InstructionsPage() {
         
       </main>
       <Footer />
+
+          {selectedUserId && (
+        <UserProfilePopup
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
+        />
+      )}
+
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">
             <button
-              onClick={() => setShowModal(false)}
+              onClick={() => { setShowModal(false); resetForm(); }}
               className="absolute right-4 top-4 text-xl font-bold text-slate-600 hover:text-slate-800"
             >
               &times;
             </button>
 
             <h2 className="p-6 pt-10 text-2xl font-semibold text-slate-900 text-center">
-              New Instruction
+              {isEditMode ? 'Edit Instruction' : 'New Instruction'}
             </h2>
 
             <form onSubmit={onSubmit} className="space-y-6 px-6 pb-8">
@@ -141,41 +194,40 @@ export default function InstructionsPage() {
                 <textarea
                   required
                   name="description"
-                  rows={4}
                   value={form.description}
                   onChange={onField}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  rows={4}
+                  className="w-full rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Hourly Rate (KM/h)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    name="hourly_rate"
-                    value={form.hourly_rate}
-                    onChange={onField}
-                    className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Contact Info</label>
-                  <input
-                    name="contact_info"
-                    value={form.contact_info}
-                    onChange={onField}
-                    className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Hourly Rate (KM)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="hourly_rate"
+                  value={form.hourly_rate}
+                  onChange={onField}
+                  className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Contact Info</label>
+                <input
+                  name="contact_info"
+                  value={form.contact_info}
+                  onChange={onField}
+                  className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
+                />
               </div>
 
               <div className="flex justify-end pt-6">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => { setShowModal(false); resetForm(); }}
                   className="mr-2 rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-gray-300"
                   disabled={saving}
                 >
@@ -183,10 +235,10 @@ export default function InstructionsPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={saving}
                   className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  disabled={saving || !form.title || !form.description}
                 >
-                  {saving ? "Saving…" : "Post Instruction"}
+                  {saving ? "Saving…" : (isEditMode ? "Update" : "Post")}
                 </button>
               </div>
             </form>

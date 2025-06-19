@@ -55,3 +55,4 @@ def login_controller(data: LoginRequest, response: Response, db: Session):
     )
 
     return {"user": jsonable_encoder(user)}
+
