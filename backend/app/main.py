@@ -22,7 +22,6 @@ from app.routes.application_router import router as application_router
 
 
 
-
 app = FastAPI()
 
 
@@ -75,4 +74,3 @@ app.include_router(internship_application_router)
 app.include_router(internship_save_router)
 app.include_router(instruction_save_router.router)
 app.include_router(application_router)
-

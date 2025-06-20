@@ -71,6 +71,7 @@ function StudentProfile() {
       fetch("http://localhost:8000/reviews/given", { credentials: "include" })
         .then((res) => res.json())
         .then((data) => {
+          console.log("Review data:", data);
           setReviewsGiven(data);
           setDataLoaded((prev) => ({ ...prev, reviewsHistory: true }));
         })
@@ -377,7 +378,12 @@ function StudentProfile() {
           />
         );
       case "reviewsHistory":
-        return <StudentReviewsGivenSection reviewsGiven={reviewsGiven} />;
+        return (
+          <StudentReviewsGivenSection
+            reviewsGiven={reviewsGiven}
+            setReviewsGiven={setReviewsGiven}
+          />
+        );
       case "myInstructionPosts":
         return (
           <StudentInstructionPostsSection

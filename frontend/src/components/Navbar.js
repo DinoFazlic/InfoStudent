@@ -59,7 +59,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-gray-200  h-[96px] sticky top-0 z-50">
+    <nav className="bg-gray-200  h-[96px] sticky top-0 z-5000">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
         <Link href={homeHref} className="flex items-center space-x-2">
           <Image

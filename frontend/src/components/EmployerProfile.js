@@ -235,7 +235,12 @@ function EmployerProfile() {
           />
         );
       case "reviewsGiven":
-        return <EmployerReviewsGivenSection reviewsGiven={reviewsGiven} />;
+        return (
+            <EmployerReviewsGivenSection
+              reviewsGiven={reviewsGiven}
+              setReviewsGiven={setReviewsGiven}
+            />
+          );      
       case "posts":
         return (
           <EmployerPostsSection

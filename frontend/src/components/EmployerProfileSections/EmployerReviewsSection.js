@@ -8,17 +8,27 @@ function EmployerReviewsSection({ reviewsReceived, averageScore }) {
       <h2 className="text-[1.8rem] font-bold text-gray-800 mb-[25px] text-center">
         Reviews
       </h2>
-      <div className="text-center mb-5 text-[1.3rem] text-slate-800 flex justify-center items-center gap-2">
-        {averageScore}/5 <Stars rating={averageScore} />
-      </div>
+
+      {averageScore ? (
+        <div className="text-center mb-5 text-[1.3rem] text-slate-800 flex justify-center items-center gap-2">
+          {averageScore}/5 <Stars rating={averageScore} />
+        </div>
+      ) : (
+        <div className="text-center mb-5 text-[1.3rem] text-slate-500 italic">
+          No ratings yet
+        </div>
+      )}
+
       <div className="flex flex-col items-center w-full">
         {reviewsReceived.length > 0 ? (
           reviewsReceived.map((review, index) => (
             <ReviewCard
               key={index}
               name={review.reviewer_name || "Anonymous"}
-              comment={review.review_text}
+              comment={review.comment}
               rating={review.rating}
+              avatarUrl={review.avatar_url}
+              reviewerId={review.reviewer_id}
             />
           ))
         ) : (

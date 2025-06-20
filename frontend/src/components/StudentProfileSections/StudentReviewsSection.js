@@ -17,8 +17,10 @@ function StudentReviewsSection({ reviewsReceived, averageScore }) {
             <ReviewCard
               key={index}
               name={review.reviewer_name || "Anonymous"}
-              comment={review.review_text}
+              comment={review.comment}
               rating={review.rating}
+              avatarUrl={review.avatar_url}
+              reviewerId={review.reviewer_id}
             />
           ))
         ) : (
