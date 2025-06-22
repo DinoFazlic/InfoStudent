@@ -44,4 +44,13 @@ def get_contacts(
             contact_ids.add(msg.receiver_id)
 
     contacts = db.query(User).filter(User.id.in_(contact_ids)).all()
-    return [{"id": u.id, "email": u.email} for u in contacts]
+    return [
+        {
+            "id": u.id,
+            "email": u.email,
+            "first_name": u.first_name,
+            "last_name": u.last_name,
+            "profile_photo_url": u.profile_photo_url
+        }
+        for u in contacts
+    ]

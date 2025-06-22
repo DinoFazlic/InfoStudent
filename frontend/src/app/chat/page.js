@@ -15,7 +15,20 @@ export default function ChatContactsPage() {
     axios.get('http://localhost:8000/api/messages/contacts', {
       withCredentials: true,
     })
-      .then(res => setContacts(res.data))
+      .then(res => {
+        
+
+        const contactsWithFullUrl = res.data.map((c) => {
+          const raw = c.profile_photo_url;
+          const fullUrl = raw?.startsWith("http")
+            ? raw
+            : raw
+              ? `http://localhost:8000/${raw.replace(/^\/?/, "")}`
+              : null;
+          return { ...c, profile_photo_url: fullUrl };
+        });
+        setContacts(contactsWithFullUrl);
+      })
       .catch(err => console.error("Greška pri dohvaćanju kontakata", err));
   }, []);
 
@@ -48,7 +61,19 @@ export default function ChatContactsPage() {
               {contacts.slice(0, 6).map((c) => (
                 <Link href={`/chat/${c.id}`} key={c.id}>
                   <div className="flex items-center gap-4 p-4 bg-gray-100 ring-1 rounded-lg mb-6 hover:bg-gray-200 transition cursor-pointer shadow-sm">
-                    <HiOutlineMail className="text-blue-600 text-xl" />
+                      {c.profile_photo_url ? (
+                          <img
+                            src={c.profile_photo_url}
+                            alt="User Avatar"
+                            className="w-10 h-10 rounded-full object-cover border border-blue-400"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm border border-blue-400">
+                            {c.first_name?.[0] ?? ""}{c.last_name?.[0] ?? ""}
+                          </div>
+                        )}
+
+
                     <span className="text-gray-800 font-medium">{c.email}</span>
                   </div>
                 </Link>

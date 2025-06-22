@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import axios from 'axios';
 import { useNotification } from '@/context/NotificationContext';  // 👈 OVO DODAJ
+import UserProfileCard from '@/components/UserProfileCard';
+
 
 
 export default function ChatPage() {
@@ -14,6 +16,10 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [otherUsername, setOtherUsername] = useState("");
+  const [showProfile, setShowProfile] = useState(false);
+  const [otherAvatarUrl, setOtherAvatarUrl] = useState(null);
+
+
 
   const { showNotification } = useNotification(); 
 
@@ -43,6 +49,14 @@ const { sendMessage } = useWebSocket(currentUserId, (data) => {
     axios.get(`http://localhost:8000/auth/users/${otherUserId}`, { withCredentials: true })
       .then(res => {
         setOtherUsername(res.data.first_name + " " + res.data.last_name);
+        const raw = res.data.profile_photo_url;
+        const fullUrl = raw?.startsWith("http")
+          ? raw
+          : raw
+            ? `http://localhost:8000/${raw.replace(/^\/?/, '')}`
+            : null;
+        setOtherAvatarUrl(fullUrl);
+
       })
       .catch(err => {
         setOtherUsername(`User ${otherUserId}`);
@@ -78,51 +92,77 @@ const { sendMessage } = useWebSocket(currentUserId, (data) => {
     </div>
   );
 
-  return (
-    <div className="w-full min-h-[60vh] max-h-screen-lg bg-white shadow-md p-6" style={{ backgroundImage: "url('/backgrounds/post-bg4.svg')", backgroundPosition: "center" }}>
-      <div className="max-w-7xl mx-auto">
-        <button
-          onClick={() => router.push('/chat')}
-          className="max-w-7xl mx-auto mb-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md inline-flex items-center transition cursor-pointer"
-        >
-          Back to Contacts
-        </button>
-      </div>
-      
-      <h2 className="text-4xl font-semibold text-blue-600 mb-4 max-w-7xl mx-auto">
-        Chat with {otherUsername}
-      </h2>
-
-      <div className="h-96 overflow-y-auto min-h-[70vh] max-w-7xl mx-auto rounded-md p-4 mb-4 bg-gray-100 bg-cover bg-center bg-no-repeat border border-gray-800 shadow-sm">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`mb-3 p-3 rounded-3xl text-md max-w-xs break-words whitespace-pre-wrap ${
-              msg.sender_id === currentUserId
-                ? "ml-auto bg-blue-300 text-blue-950"
-                : "mr-auto bg-gray-300 text-gray-750"
-            }`}
+      return (
+      <div
+        className="w-full min-h-screen bg-white bg-cover bg-center p-6"
+        style={{ backgroundImage: "url('/backgrounds/post-bg4.svg')" }}
+      >
+        <div className="max-w-3xl mx-auto bg-white/90 rounded-lg shadow-md p-6 space-y-6">
+          <button
+            onClick={() => router.push('/chat')}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded transition"
           >
-            {msg.content}
+            ← Back to Contacts
+          </button>
+
+          <div className="flex items-center gap-4 justify-center">
+          <img
+            src={otherAvatarUrl || "/default-avatar.png"}
+            alt="User Avatar"
+            className="w-10 h-10 rounded-full border border-blue-400 shadow"
+          />
+          <h2 className="text-2xl font-semibold text-blue-700">
+            Chat with {otherUsername}
+          </h2>
+        </div>
+
+
+
+          <div className="h-[400px] overflow-y-auto bg-gray-100 p-4 rounded-lg border border-gray-300 space-y-2">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`p-3 rounded-2xl text-sm max-w-[75%] break-words whitespace-pre-wrap ${
+                  msg.sender_id === currentUserId
+                    ? "ml-auto bg-blue-200 text-blue-900"
+                    : "mr-auto bg-gray-300 text-gray-800"
+                }`}
+              >
+                <div>{msg.content}</div>
+                {msg.timestamp && (
+                  <div className="text-[10px] text-right mt-1 opacity-60">
+                    {new Date(msg.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
+
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Write a message..."
+              className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              onClick={handleSend}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-full transition"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+
+
+
       </div>
 
-      <div className="max-w-7xl mx-auto flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Write a message..."
-          className="bg-gray-100 flex-1 border border-black rounded-md px-4 py-2"
-        />
-        <button
-          onClick={handleSend}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-xl font-bold cursor-pointer"
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  );
+      
+    );
+
 }
