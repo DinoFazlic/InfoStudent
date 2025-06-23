@@ -64,9 +64,9 @@ export default function LandingNavbar() {
           isMenuOpen ? "opacity-100 translate-y-0" : "hidden"
         }`}
       >
-        <Link href="/landing/jobs" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Jobs</Link>
-        <Link href="/landing/instructions" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Instructions</Link>
-        <Link href="/landing/internships" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Internships</Link>
+        <Link href="/jobs" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Jobs</Link>
+        <Link href="/instructions" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Instructions</Link>
+        <Link href="/internships" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Internships</Link>
         <Link href="/login" onClick={() => setIsMenuOpen(false)}>
           <button className="w-full py-2 bg-cyan-900 text-white rounded hover:bg-cyan-700 transition">Log in</button>
         </Link>

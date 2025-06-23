@@ -10,3 +10,4 @@ __pycache__/
 #backend/app/static/profile_photos/
 #backend/app/static/cv_uploads/
 #backend/app/static/schedule_uploads/
+venv/

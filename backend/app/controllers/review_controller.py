@@ -35,8 +35,14 @@ def leave_review_controller(
 ):
     if review_data.reviewee_id == current_user.id:
         raise HTTPException(status_code=400, detail="You cannot review yourself.")
-    return review_service.add_review(db, reviewer_id=current_user.id, data=review_data)
 
+    result = review_service.add_review(db, reviewer_id=current_user.id, data=review_data)
+
+    if isinstance(result, tuple):
+        body, status = result
+        raise HTTPException(status_code=status, detail=body.get("error", "Unable to add review"))
+
+    return result
 
 def get_reviews_of_user_controller(
     user_id: int,

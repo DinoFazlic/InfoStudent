@@ -24,8 +24,9 @@ export default function InstructionsPage() {
     subject: "",
     description: "",
     hourly_rate: "",
-    contact_info: "",
   });
+
+  const DESC_MAX = 300;
 
   useEffect(() => {
     (async () => {
@@ -49,7 +50,6 @@ export default function InstructionsPage() {
       subject: inst.subject ?? "",
       description: inst.description,
       hourly_rate: inst.hourly_rate ?? "",
-      contact_info: inst.contact_info ?? "",
     });
     setIsEditMode(true);
     setCurrentId(id);
@@ -63,8 +63,8 @@ export default function InstructionsPage() {
     setSaving(true);
     try {
       const payload = { ...form };
+      payload.description = payload.description.slice(0, DESC_MAX);
       if (payload.hourly_rate === "") delete payload.hourly_rate;
-      if (payload.contact_info === "") delete payload.contact_info;
       if (payload.subject === "") delete payload.subject;
 
       if (isEditMode && currentId) {
@@ -83,7 +83,7 @@ export default function InstructionsPage() {
   }
 
   const resetForm = () => {
-    setForm({ title: "", subject: "", description: "", hourly_rate: "", contact_info: "" });
+    setForm({ title: "", subject: "", description: "", hourly_rate: "" });
     setIsEditMode(false);
     setCurrentId(null);
   };
@@ -94,6 +94,7 @@ export default function InstructionsPage() {
       <main className="flex-1 container mx-auto px-4 pt-6 pb-12">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
+          {me && (
           <button
             onClick={() => {
               resetForm();
@@ -103,6 +104,7 @@ export default function InstructionsPage() {
           >
             <span className="text-lg flex items-center justify-center">+</span> Add Instruction
           </button>
+          )}
         </div>
 
         {loading ? (
@@ -196,9 +198,11 @@ export default function InstructionsPage() {
                   name="description"
                   value={form.description}
                   onChange={onField}
+                  maxLength={DESC_MAX}
                   rows={4}
                   className="w-full rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                 />
+                <p className="text-xs text-right text-gray-500">{form.description.length}/{DESC_MAX}</p>
               </div>
 
               <div>
@@ -209,16 +213,6 @@ export default function InstructionsPage() {
                   min="0"
                   name="hourly_rate"
                   value={form.hourly_rate}
-                  onChange={onField}
-                  className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Contact Info</label>
-                <input
-                  name="contact_info"
-                  value={form.contact_info}
                   onChange={onField}
                   className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                 />

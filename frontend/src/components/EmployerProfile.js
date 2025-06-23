@@ -173,15 +173,21 @@ function EmployerProfile() {
   };
 
   const handleSaveChanges = () => {
+    const sanitize = (value) => {
+      if (value === "") return null;
+      if (Array.isArray(value) && value.length === 0) return null;
+      return value;
+    };
+
     const updatedData = {
-      first_name: form.first_name,
-      last_name: form.last_name,
-      company_name: form.company_name,
-      company_description: form.company_description,
-      address: form.address,
-      website_url: form.website_url,
-      contact_phone: form.contact_phone,
-      city: form.city,
+      first_name: sanitize(form.first_name),
+      last_name: sanitize(form.last_name),
+      company_name: sanitize(form.company_name),
+      company_description: sanitize(form.company_description),
+      address: sanitize(form.address),
+      website_url: sanitize(form.website_url),
+      contact_phone: sanitize(form.contact_phone),
+      city: sanitize(form.city),
     };
 
     fetch("http://localhost:8000/users/employer/profile", {
@@ -190,16 +196,22 @@ function EmployerProfile() {
       credentials: "include",
       body: JSON.stringify(updatedData),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to update employer profile");
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.detail || "Failed to update employer profile");
+        }
         return res.json();
       })
       .then(() => {
         setProfile(form);
-        setBackupForm(form); 
+        setBackupForm(form);
         setEditMode(false);
       })
-      .catch((err) => console.error("Update failed:", err));
+      .catch((err) => {
+        console.error("Update failed:", err);
+        alert(err.message || "Failed to update employer profile");
+      });
   };
 
   const handleChange = (e) => {

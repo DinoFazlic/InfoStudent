@@ -7,7 +7,7 @@ import axios from "axios";
 import { getMe } from "@/utils/api/auth";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
-import { FaEdit, FaTrashAlt, FaEnvelope, FaMapMarkerAlt, FaBuilding, FaUser, FaCoins, FaBookmark, FaRegBookmark, FaCalendarAlt } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaEnvelope, FaMapMarkerAlt, FaCoins, FaCalendarAlt, FaBuilding, FaUser, FaBookmark, FaRegBookmark, FaLightbulb } from 'react-icons/fa';
 
 export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }) {
   const router = useRouter();
@@ -22,6 +22,7 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
   const [showInsightModal, setShowInsightModal] = useState(false);
   const [uploadNewCV, setUploadNewCV] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [appliedLocal, setAppliedLocal] = useState(job.applied || false);
 
   useEffect(() => {
     async function fetchUser() {
@@ -110,7 +111,9 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
       router.push("/login");
       return;
     }
-    setShowModal(true);
+    if (appliedLocal) return;
+    setAppliedLocal(true);
+    if (onApply) onApply(job.id);
   };
 
   const handleMessage = () => {
@@ -213,14 +216,22 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
 
         {me && me.role === "student" && (
           <div className="absolute right-3 top-3 flex gap-2 z-10">
-          <button
+            <button
               onClick={handleToggleSave}
               disabled={savingJob}
               className="text-lg font-bold text-yellow-500 hover:text-yellow-700"
               title={saved ? "Unsave Job" : "Save Job"}
             >
               {saved ? <FaBookmark /> : <FaRegBookmark />}
-          </button>
+            </button>
+            <button
+              onClick={fetchInsight}
+              disabled={loadingInsight}
+              className="text-lg font-bold text-cyan-600 hover:text-cyan-800"
+              title="AI Insight"
+            >
+              <FaLightbulb />
+            </button>
           </div>
         )}
 
@@ -292,12 +303,21 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
                 </button>
             ) : me.role === "student" ? (
                 <div className="flex gap-3">
-                    <button
+                    {appliedLocal ? (
+                      <button
+                        disabled
+                        className="flex-1 bg-gray-300 text-gray-600 py-2 px-4 rounded-lg cursor-default flex items-center justify-center gap-2"
+                      >
+                        Applied
+                      </button>
+                    ) : (
+                      <button
                         onClick={handleApply}
                         className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-2 px-4 rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
-                    >
+                      >
                         Apply Now
-                    </button>
+                      </button>
+                    )}
                     <button
                         onClick={handleMessage}
                         className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 px-4 rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-200 flex items-center justify-center gap-2"
