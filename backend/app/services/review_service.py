@@ -3,7 +3,7 @@ from app.models.users import User
 from app.models.review import Review
 from app.repositories.review_repository import create_review, get_received_reviews, get_given_reviews, delete_review_by_id, get_reviews_for_user, update_review_by_id
 from app.schemas.review_schema import ReviewCreate, ReviewReceivedSchema, ReviewGivenSchema, ReviewUpdateSchema
-from sqlmodel import select
+from sqlalchemy import select
 
 def get_reviews_received_service(current_user: User, db: Session):
     reviews = get_received_reviews(current_user.id, db)
@@ -90,7 +90,12 @@ def update_review_service(review_id: int, data: ReviewUpdateSchema, current_user
 
 def add_review(db: Session, reviewer_id: int, data: ReviewCreate) -> Review:
     # Check if this reviewer has already reviewed this user
-    existing = db.exec(select(Review).where(Review.reviewer_id == reviewer_id, Review.reviewee_id == data.reviewee_id)).first()
+    existing = db.execute(
+        select(Review).where(
+            Review.reviewer_id == reviewer_id,
+            Review.reviewee_id == data.reviewee_id,
+        )
+    ).scalar_one_or_none()
     if existing:
         return {"error": "You have already reviewed this user."}, 400
 
