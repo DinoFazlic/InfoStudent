@@ -1,9 +1,8 @@
 import os
 import requests
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
 def generate_ai_prompt(description: str) -> str:
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
     print("GROQ_API_KEY:", GROQ_API_KEY)
 
     url = "https://api.groq.com/openai/v1/chat/completions"

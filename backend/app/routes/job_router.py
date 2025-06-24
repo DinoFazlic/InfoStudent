@@ -44,7 +44,10 @@ def list_jobs(
         data["created_by"] = j.created_by
 
         if u:
-            data["author_name"]       = f"{u.first_name or ''} {u.last_name or ''}".strip() or u.email
+            if u.role == "employer" and u.employer_profile and u.employer_profile.company_name:
+                data["author_name"] = u.employer_profile.company_name
+            else:
+                data["author_name"] = f"{u.first_name or ''} {u.last_name or ''}".strip() or u.email
             data["author_avatar_url"] = u.profile_photo_url
 
         # Mark if applied — only if student, otherwise always False
@@ -66,7 +69,7 @@ def create_job(payload: JobCreate, db: Session = Depends(get_db), user: User = D
     db.commit()
     db.refresh(job)
 
-    name = f"{(user.first_name or '')} {(user.last_name or '')}".strip() or user.email
+    name = user.employer_profile.company_name if user.role == "employer" and user.employer_profile and user.employer_profile.company_name else (f"{(user.first_name or '')} {(user.last_name or '')}".strip() or user.email)
     data = {
         **job.dict(),
         "author_name": name,
@@ -117,7 +120,7 @@ def update_job(
     author = db.get(User, job.created_by)
     return JobRead.model_validate({
         **job.dict(),
-        "author_name": f"{author.first_name or ''} {author.last_name or ''}".strip() or author.email,
+        "author_name": (author.employer_profile.company_name if author.role == "employer" and author.employer_profile and author.employer_profile.company_name else f"{author.first_name or ''} {author.last_name or ''}".strip() or author.email),
         "author_avatar_url": author.profile_photo_url,
         "applied": False,
         "saved": False,

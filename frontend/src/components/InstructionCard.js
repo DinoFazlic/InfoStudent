@@ -6,7 +6,8 @@ import axios from "axios";
 import { getMe } from "@/utils/api/auth";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
-import { FaEdit, FaTrashAlt, FaEnvelope, FaPhoneAlt, FaBookmark, FaRegBookmark, FaGraduationCap, FaClock } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaEnvelope, FaPhoneAlt, FaBookmark, FaRegBookmark, FaGraduationCap, FaClock, FaLightbulb } from 'react-icons/fa';
+import Link from "next/link";
 
 export default function InstructionCard({ instruction, onSaveToggle, onEdit, onDelete }) {
   const [hidden, setHidden] = useState(false);
@@ -15,6 +16,8 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
   const [saving, setSaving] = useState(false);
   const [messaging, setMessaging] = useState(false);
   const [saved, setSaved] = useState(instruction.saved || false);
+  const [aiInsight, setAiInsight] = useState("");
+  const [showInsightModal, setShowInsightModal] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,6 +33,8 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
   const authorName = instruction.company_name || instruction.authorName || "Unknown";
   const avatarUrl = instruction.authorAvatarUrl ?? null;
   const createdIso = instruction.createdAt ?? null;
+  const profileLink = instruction.createdBy ? `/profile/${instruction.createdBy}` : '#';
+  const isEmployer = instruction.company_name && instruction.company_name.trim() !== '';
 
   const handleSave = async () => {
     setSaving(true);
@@ -95,27 +100,40 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
           >
             {saved ? <FaBookmark /> : <FaRegBookmark />}
           </button>
+          <button
+            disabled
+            className="text-lg font-bold text-gray-400 cursor-not-allowed"
+            title="AI Insight (disabled)"
+          >
+            <FaLightbulb />
+          </button>
         </div>
       )}
 
       <div>
         <header className="flex items-center gap-3 p-5 border-b border-gray-100 bg-white/70 backdrop-blur-sm">
-          {avatarUrl ? (
-            <Image
-              src={`http://localhost:8000${avatarUrl}`}
-              alt={authorName}
-              width={48}
-              height={48}
-              className="rounded-full object-cover"
-              onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-              {authorName.slice(0, 1).toUpperCase()}
+          <Link href={profileLink}>
+            <div className="cursor-pointer">
+              {avatarUrl ? (
+                <Image
+                  src={`http://localhost:8000${avatarUrl}`}
+                  alt={authorName}
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover"
+                  onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+                  {authorName.slice(0, 1).toUpperCase()}
+                </div>
+              )}
             </div>
-          )}
+          </Link>
           <div className="flex flex-col">
-            <span className="font-semibold text-gray-800">{authorName}</span>
+            <Link href={profileLink}>
+              <span className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer">{authorName}</span>
+            </Link>
             <time className="text-sm text-slate-500">
               Posted: {createdIso ? new Date(createdIso).toLocaleDateString("en-US", {
                 day: '2-digit',
@@ -196,6 +214,18 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
           </div>
         ) : null}
       </div>
+
+      {showInsightModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl space-y-4 relative">
+            <button onClick={() => setShowInsightModal(false)} className="absolute right-4 top-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            <h2 className="text-xl font-semibold">AI Insight</h2>
+            <div className="prose max-w-none">
+              <p>{aiInsight}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
