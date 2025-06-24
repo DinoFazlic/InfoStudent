@@ -101,21 +101,9 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
             {saved ? <FaBookmark /> : <FaRegBookmark />}
           </button>
           <button
-            onClick={async () => {
-              if (!instruction.description) { toast.error("Description missing"); return; }
-              setLoadingInsight(true);
-              try {
-                const res = await axios.post("http://localhost:8000/ai/insight", { description: instruction.description }, { withCredentials: true });
-                setAiInsight(res.data.insight);
-                setShowInsightModal(true);
-              } catch (err) {
-                console.error(err);
-                toast.error("Could not fetch AI Insight.");
-              } finally { setLoadingInsight(false); }
-            }}
-            disabled={loadingInsight}
-            className="text-lg font-bold text-cyan-600 hover:text-cyan-800"
-            title="AI Insight"
+            disabled
+            className="text-lg font-bold text-gray-400 cursor-not-allowed"
+            title="AI Insight (disabled)"
           >
             <FaLightbulb />
           </button>

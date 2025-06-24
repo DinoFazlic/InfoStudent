@@ -225,10 +225,9 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
               {saved ? <FaBookmark /> : <FaRegBookmark />}
             </button>
             <button
-              onClick={fetchInsight}
-              disabled={loadingInsight}
-              className="text-lg font-bold text-cyan-600 hover:text-cyan-800"
-              title="AI Insight"
+              disabled
+              className="text-lg font-bold text-gray-400 cursor-not-allowed"
+              title="AI Insight (disabled)"
             >
               <FaLightbulb />
             </button>
