@@ -6,18 +6,15 @@ import axios from "axios";
 import { getMe } from "@/utils/api/auth";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
-import { FaEdit, FaTrashAlt, FaEnvelope, FaPhoneAlt, FaBookmark, FaRegBookmark, FaGraduationCap, FaClock, FaLightbulb, FaSpinner } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaEnvelope, FaPhoneAlt, FaBookmark, FaRegBookmark, FaGraduationCap, FaClock } from 'react-icons/fa';
 import Link from "next/link";
 
 export default function InstructionCard({ instruction, onSaveToggle, onEdit, onDelete }) {
   const [hidden, setHidden] = useState(false);
-  const [loadingInsight, setLoadingInsight] = useState(false);
   const [me, setMe] = useState(null);
   const [saving, setSaving] = useState(false);
   const [messaging, setMessaging] = useState(false);
   const [saved, setSaved] = useState(instruction.saved || false);
-  const [aiInsight, setAiInsight] = useState("");
-  const [showInsightModal, setShowInsightModal] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -65,31 +62,6 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
     }
   };
 
-  const fetchInsight = async () => {
-    if (!instruction.description) {
-      toast.error("Instruction description is missing. Cannot generate AI Insight.");
-      return;
-    }
-
-    setLoadingInsight(true);
-
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/ai/insight",
-        { description: instruction.description },
-        { withCredentials: true }
-      );
-
-      setAiInsight(response.data.insight);
-      setShowInsightModal(true);
-    } catch (error) {
-      console.error("AI Insight error:", error);
-      toast.error("Could not fetch AI Insight.");
-    } finally {
-      setLoadingInsight(false);
-    }
-  };
-
   return (
     <article className="relative overflow-hidden rounded-2xl shadow-lg bg-[url('/backgrounds/post-bg4.svg')] bg-cover text-slate-800 flex flex-col justify-between">
       {(me && (me.id === instruction.createdBy || me.role === "admin")) && (
@@ -124,14 +96,6 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
             title={saved ? "Unsave Instruction" : "Save Instruction"}
           >
             {saved ? <FaBookmark /> : <FaRegBookmark />}
-          </button>
-          <button
-            onClick={fetchInsight}
-            disabled={loadingInsight}
-            className="text-lg font-bold text-purple-500 hover:text-purple-700"
-            title={loadingInsight ? "Generating Insight..." : "AI Insight"}
-          >
-            {loadingInsight ? <FaSpinner className="animate-spin" /> : <FaLightbulb />}
           </button>
         </div>
       )}
@@ -240,20 +204,6 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
           </div>
         ) : null}
       </div>
-
-      {showInsightModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-white rounded-xl p-6 w-full max-w-2xl space-y-4 relative">
-            <button onClick={() => setShowInsightModal(false)} className="absolute right-4 top-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
-            <h2 className="text-xl font-semibold text-center text-indigo-600">
-              AI Insight for {instruction.title}
-            </h2>
-            <div className="prose max-w-none max-h-96 overflow-y-auto whitespace-pre-wrap text-sm">
-              {aiInsight}
-            </div>
-          </div>
-        </div>
-      )}
     </article>
   );
 }
