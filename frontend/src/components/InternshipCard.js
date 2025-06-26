@@ -6,7 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { getMe } from "@/utils/api/auth";
-import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaBuilding, FaUser, FaCoins, FaEdit, FaTrashAlt, FaBookmark, FaRegBookmark, FaEnvelope, FaLightbulb } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaBuilding, FaUser, FaCoins, FaEdit, FaTrashAlt, FaBookmark, FaRegBookmark, FaEnvelope, FaLightbulb, FaSpinner } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
 import { saveInternship, unsaveInternship } from "@/utils/api/internships";
 
@@ -180,11 +180,12 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
               {saved ? <FaBookmark /> : <FaRegBookmark />}
             </button>
             <button
-              disabled
-              className="text-lg font-bold text-gray-400 cursor-not-allowed"
-              title="AI Insight (disabled)"
+              onClick={fetchInsight}
+              disabled={loadingInsight}
+              className="text-lg font-bold text-purple-500 hover:text-purple-700"
+              title={loadingInsight ? "Generating Insight..." : "AI Insight"}
             >
-              <FaLightbulb />
+              {loadingInsight ? <FaSpinner className="animate-spin" /> : <FaLightbulb />}
             </button>
           </div>
         )}
@@ -331,9 +332,11 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-white rounded-xl p-6 w-full max-w-2xl space-y-4 relative">
             <button onClick={() => setShowInsightModal(false)} className="absolute right-4 top-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
-            <h2 className="text-xl font-semibold">AI Insight</h2>
-            <div className="prose max-w-none">
-              <p>{aiInsight}</p>
+            <h2 className="text-xl font-semibold text-center text-indigo-600">
+              AI Insight for {item.title}
+            </h2>
+            <div className="prose max-w-none max-h-96 overflow-y-auto whitespace-pre-wrap text-sm">
+              {aiInsight}
             </div>
           </div>
         </div>

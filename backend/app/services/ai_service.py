@@ -13,11 +13,13 @@ def generate_ai_prompt(description: str) -> str:
     }
 
     data = {
-        "model": "llama3-70b-8192", 
+        "model": "llama3-8b-8192", 
         "messages": [
             {
                 "role": "system",
-                "content": "You are a career advisor AI that helps students land jobs by analyzing job descriptions and giving personalized tips."
+                "content": (
+                    "You are a career-advisor AI. Analyse the description and give up to 6 concise bullet-point tips (max 25 words each)."
+                )
             },
             {
                 "role": "user",
@@ -31,7 +33,7 @@ def generate_ai_prompt(description: str) -> str:
             }
         ],
         "temperature": 0.7,
-        "max_tokens": 500
+        "max_tokens": 300
     }
 
     response = requests.post(url, headers=headers, json=data)

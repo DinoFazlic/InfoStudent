@@ -7,7 +7,7 @@ import axios from "axios";
 import { getMe } from "@/utils/api/auth";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
-import { FaEdit, FaTrashAlt, FaEnvelope, FaMapMarkerAlt, FaCoins, FaCalendarAlt, FaBuilding, FaUser, FaBookmark, FaRegBookmark, FaLightbulb } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaEnvelope, FaMapMarkerAlt, FaCoins, FaCalendarAlt, FaBuilding, FaUser, FaBookmark, FaRegBookmark, FaLightbulb, FaSpinner } from 'react-icons/fa';
 
 export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }) {
   const router = useRouter();
@@ -225,11 +225,12 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
               {saved ? <FaBookmark /> : <FaRegBookmark />}
             </button>
             <button
-              disabled
-              className="text-lg font-bold text-gray-400 cursor-not-allowed"
-              title="AI Insight (disabled)"
+              onClick={fetchInsight}
+              disabled={loadingInsight}
+              className="text-lg font-bold text-purple-500 hover:text-purple-700"
+              title={loadingInsight ? "Generating Insight..." : "AI Insight"}
             >
-              <FaLightbulb />
+              {loadingInsight ? <FaSpinner className="animate-spin" /> : <FaLightbulb />}
             </button>
           </div>
         )}
@@ -397,9 +398,11 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-white rounded-xl p-6 w-full max-w-2xl space-y-4 relative">
             <button onClick={() => setShowInsightModal(false)} className="absolute right-4 top-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
-            <h2 className="text-xl font-semibold">AI Insight</h2>
-            <div className="prose max-w-none">
-              <p>{aiInsight}</p>
+            <h2 className="text-xl font-semibold text-center text-indigo-600">
+              AI Insight for {job.title}
+            </h2>
+            <div className="prose max-w-none max-h-96 overflow-y-auto whitespace-pre-wrap text-sm">
+              {aiInsight}
             </div>
           </div>
         </div>
