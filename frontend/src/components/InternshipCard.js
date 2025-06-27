@@ -4,13 +4,14 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
+
 import { toast } from "react-hot-toast";
 import { getMe } from "@/utils/api/auth";
 import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaBuilding, FaUser, FaCoins, FaEdit, FaTrashAlt, FaBookmark, FaRegBookmark, FaEnvelope, FaLightbulb, FaSpinner } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
 import { saveInternship, unsaveInternship } from "@/utils/api/internships";
 
-export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, onEdit }) {
+export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, onEdit, setSelectedUser, setShowProfilePopup }) {
   const router = useRouter();
   const [me, setMe] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -192,24 +193,29 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
 
         <div>
             <header className="flex items-center gap-3 p-5 border-b border-gray-100 bg-white/70 backdrop-blur-sm">
-                <Link href={profileLink}>
-                    <div className="cursor-pointer">
-                        {avatarUrl ? (
-                            <Image
-                                src={`http://localhost:8000${avatarUrl}`}
-                                alt={authorName}
-                                width={48}
-                                height={48}
-                                className="rounded-full object-cover"
-                                onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
-                            />
-                        ) : (
-                            <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-                                {isEmployer ? <FaBuilding /> : <FaUser />}
-                            </div>
-                        )}
-                    </div>
-                </Link>
+                <div
+            onClick={() => {
+              setSelectedUser(item.author_id);   // ili job.author_id ako se tako zove
+              setShowProfilePopup(true);
+            }}
+            className="cursor-pointer"
+          >
+            {avatarUrl ? (
+              <Image
+                src={`http://localhost:8000${avatarUrl}`}
+                alt={authorName}
+                width={48}
+                height={48}
+                className="rounded-full object-cover"
+                onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+                {isEmployer ? <FaBuilding /> : <FaUser />}
+              </div>
+            )}
+          </div>
+
                 <div className="flex flex-col">
                     <Link href={profileLink}>
                         <span className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer">{authorName}</span>

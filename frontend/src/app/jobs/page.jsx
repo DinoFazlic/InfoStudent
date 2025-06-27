@@ -8,6 +8,8 @@ import { listJobs, createJob, deleteJob } from "@/utils/api/jobs";
 import { getMe } from "@/utils/api/auth";
 import Link from "next/link";
 import axios from "axios";
+import UserProfileCard from "@/components/UserProfileCard";
+
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
@@ -349,7 +351,14 @@ useEffect(() => {
               >
                 &times;
               </button>
-              <UserProfileCard user={selectedUser} />
+              <UserProfileCard
+              userId={selectedUser}
+              onClose={() => {
+                setShowProfilePopup(false);
+                setSelectedUser(null);
+              }}
+            />
+
             </div>
           </div>
         )}

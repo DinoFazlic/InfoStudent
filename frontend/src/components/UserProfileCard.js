@@ -112,7 +112,6 @@ export default function UserProfilePopup({ userId, onClose }) {
     <div className="fixed inset-0 z-[5000] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto font-sans p-0">
 
-        {/* HEADER */}
         <div className="bg-blue-700 text-white flex justify-between items-center px-6 py-4 rounded-t-2xl">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             👤 {data.first_name} {data.last_name}
@@ -122,7 +121,7 @@ export default function UserProfilePopup({ userId, onClose }) {
           </button>
         </div>
 
-        {/* AVATAR */}
+  
         <div className="flex justify-center mt-4">
           {data.avatar_url ? (
             <img
@@ -137,7 +136,7 @@ export default function UserProfilePopup({ userId, onClose }) {
           )}
         </div>
 
-        {/* BASIC INFO */}
+
         <div className="p-6 text-center space-y-1 text-gray-700 text-sm">
           <p>📧 <span className="font-medium">{data.email}</span></p>
           <p>📍 <span className="font-medium">{data.city}</span></p>
@@ -157,7 +156,6 @@ export default function UserProfilePopup({ userId, onClose }) {
           </div>
         </div>
 
-        {/* STUDENT INFO */}
         {data.biography && (
           <div className="bg-blue-50 px-6 py-4 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-blue-800 mb-2">🎓 Student Information</h3>
@@ -203,7 +201,7 @@ export default function UserProfilePopup({ userId, onClose }) {
           </div>
         )}
 
-        {/* EMPLOYER INFO */}
+    
         {data.company_name && (
           <div className="bg-blue-50 px-6 py-4 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-blue-800 mb-2">🏢 Employer Information</h3>
@@ -224,7 +222,7 @@ export default function UserProfilePopup({ userId, onClose }) {
         {data.role === "employer" && (
   <div className="px-6 pt-4 pb-6 space-y-6">
 
-    {/* Jobs */}
+
     {employerJobs.length > 0 && (
       <div>
         <h3 className="text-lg font-semibold text-blue-800 mb-2">🧰 Jobs Posted</h3>
@@ -241,7 +239,7 @@ export default function UserProfilePopup({ userId, onClose }) {
       </div>
     )}
 
-        {/* Internships */}
+        
         {employerInternships.length > 0 && (
           <div>
             <h3 className="text-lg font-semibold text-blue-800 mb-2">🎓 Internships Posted</h3>
@@ -261,7 +259,7 @@ export default function UserProfilePopup({ userId, onClose }) {
     )}
 
 
-        {/* AVAILABILITY */}
+
         {data.availability?.length > 0 && (
           <div className="bg-blue-50 px-6 py-4 border-t border-gray-200">
             <h4 className="text-base font-semibold text-blue-700 mb-2">📅 Weekly Availability</h4>
@@ -303,7 +301,7 @@ export default function UserProfilePopup({ userId, onClose }) {
           </div>
         )}
 
-        {/* REVIEWS */}
+
         <div className="px-6 pt-6 pb-6">
           <h3 className="text-lg font-bold text-blue-800 mb-2 border-b pb-1 border-blue-100">📣 Reviews</h3>
           {averageRating !== null && (
@@ -342,7 +340,6 @@ export default function UserProfilePopup({ userId, onClose }) {
       )}
 
 
-        {/* LEAVE A REVIEW */}
         <div className="p-6 border-t border-gray-200 text-center space-y-4">
           <button
             onClick={() => setShowReviewForm(true)}

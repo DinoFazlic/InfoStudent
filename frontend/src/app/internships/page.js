@@ -9,6 +9,7 @@ import { getMe } from "@/utils/api/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import UserProfileCard from "@/components/UserProfileCard";
 
 export default function InternshipsPage() {
   const [items, setItems] = useState([]);
@@ -31,6 +32,9 @@ export default function InternshipsPage() {
   const [locationFilter, setLocationFilter] = useState("");
   const [minStipend, setMinStipend] = useState("");
   const [allLocations, setAllLocations] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+
 
 
 
@@ -262,6 +266,8 @@ export default function InternshipsPage() {
                 }}
                 onDelete={handleDelete}
                 onEdit={handleEditInternship}
+                setSelectedUser={setSelectedUser}
+                setShowProfilePopup={setShowProfilePopup}
               />
             ))}
           </div>
@@ -369,6 +375,30 @@ export default function InternshipsPage() {
           </div>
         </div>
       )}
+
+      {showProfilePopup && selectedUser && (
+        <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+          <div className="relative bg-white rounded-xl p-6 w-full max-w-3xl shadow-xl">
+            <button
+              onClick={() => {
+                setShowProfilePopup(false);
+                setSelectedUser(null);
+              }}
+              className="absolute top-3 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800"
+            >
+              &times;
+            </button>
+            <UserProfileCard
+              userId={selectedUser}
+              onClose={() => {
+                setShowProfilePopup(false);
+                setSelectedUser(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

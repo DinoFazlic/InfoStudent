@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
 import { FaEdit, FaTrashAlt, FaEnvelope, FaMapMarkerAlt, FaCoins, FaCalendarAlt, FaBuilding, FaUser, FaBookmark, FaRegBookmark, FaLightbulb, FaSpinner } from 'react-icons/fa';
 
-export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }) {
+export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit, setSelectedUser, setShowProfilePopup }){
   const router = useRouter();
   const [hidden, setHidden] = useState(false);
   const [aiInsight, setAiInsight] = useState("");
@@ -23,7 +23,7 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
   const [uploadNewCV, setUploadNewCV] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [appliedLocal, setAppliedLocal] = useState(job.applied || false);
-  const [showProfilePopup, setShowProfilePopup] = useState(false);
+
 
 
   useEffect(() => {
@@ -239,34 +239,35 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
 
         <div>
           <header className="flex items-center gap-3 p-5 border-b border-gray-100 bg-white/70 backdrop-blur-sm">
-            <div onClick={() => setShowProfilePopup(true)} className="cursor-pointer">
-            {avatarUrl ? (
-              <Image
-                src={`http://localhost:8000${avatarUrl}`}
-                alt={authorName}
-                width={48}
-                height={48}
-                className="rounded-full object-cover"
-                onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-                {isEmployer ? <FaBuilding /> : <FaUser />}
-              </div>
-            )}
-          </div>
+            <div
+          onClick={() => {
+            setSelectedUser(job.author_id); // pošalji samo broj!
+            setShowProfilePopup(true);
+          }}
+          className="cursor-pointer"
+        >
+          {avatarUrl ? (
+            <Image
+              src={`http://localhost:8000${avatarUrl}`}
+              alt={authorName}
+              width={48}
+              height={48}
+              className="rounded-full object-cover"
+              onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+              {isEmployer ? <FaBuilding /> : <FaUser />}
+            </div>
+          )}
+        </div>
+
 
             <div className="flex flex-col">
-                        <span
+             <span
             onClick={() => {
-              if (onProfileClick) onProfileClick();
               if (setSelectedUser && setShowProfilePopup) {
-                setSelectedUser({
-                  id: job.author_id,
-                  name: job.authorName,
-                  avatarUrl: job.authorAvatarUrl,
-                  role: job.authorRole,
-                });
+                setSelectedUser(job.author_id); // <- samo broj
                 setShowProfilePopup(true);
               }
             }}
@@ -278,9 +279,9 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
               <span className="text-xs text-slate-500">{job.author_email}</span>
               <time className="text-sm text-slate-500">
                 Posted: {formatDate(createdIso)}
-    </time>
-  </div>
-</header>
+            </time>
+          </div>
+        </header>
 
           <div className="p-5">
             <h3 className="font-bold text-lg mb-2 text-gray-900">{job.title}</h3>
