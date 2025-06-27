@@ -1,13 +1,29 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.postgresql import ARRAY
-from .users import User
+# backend/app/models/student_profile.py
+from typing import List, Optional
+from datetime import datetime
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy.dialects.postgresql import ARRAY, TEXT   
 
-class Students(SQLModel, table=True):
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
-    biography: Optional[str]
-    skills: List[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
-    experience: Optional[str]
-    cv_url: Optional[str]
-    user: Optional[User] = Relationship(back_populates="student_profile")
+class StudentProfile(SQLModel, table=True):
+    __tablename__ = "student_profiles"           # 100 % isto kao u bazi
+
+    user_id: int = Field(
+        primary_key=True,
+        foreign_key="users.id",
+        nullable=False,
+        index=True,
+    )
+
+    biography: Optional[str] = None
+    skills: Optional[List[str]] = Field(
+        sa_column=Column(ARRAY(TEXT))             # ⬅️ mapiramo na TEXT[]
+    )
+    experience: Optional[str] = None
+    cv_url: Optional[str] = None
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    schedule_url: Optional[str] = Field(default=None)
+
+    # back-ref ka User
+    user: "User" = Relationship(back_populates="student_profile")
+    
+from .users import User
