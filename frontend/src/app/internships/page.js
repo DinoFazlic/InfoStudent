@@ -269,7 +269,7 @@ export default function InternshipsPage() {
       </div>
       <Footer />
       {showAddEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">{isEditMode ? 'Edit Internship' : 'Add New Internship'}</h2>
             <form onSubmit={onSubmit} className="space-y-4">

@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { FaEdit, FaTrashAlt, FaEnvelope, FaPhoneAlt, FaBookmark, FaRegBookmark, FaGraduationCap, FaClock } from 'react-icons/fa';
 import Link from "next/link";
 
-export default function InstructionCard({ instruction, onSaveToggle, onEdit, onDelete }) {
+export default function InstructionCard({ instruction, onSaveToggle, onEdit, onDelete, onProfileClick }) {
   const [hidden, setHidden] = useState(false);
   const [me, setMe] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -27,7 +27,12 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
 
   if (hidden) return null;
 
-  const authorName = instruction.company_name || instruction.authorName || "Unknown";
+  const authorName = typeof instruction.authorName === "string" && instruction.authorName.trim()
+  ? instruction.authorName
+  : (instruction.company_name || "Unknown");
+
+  const safeAuthorName = typeof authorName === "string" ? authorName : "Unknown";
+
   const avatarUrl = instruction.authorAvatarUrl ?? null;
   const createdIso = instruction.createdAt ?? null;
   const profileLink = instruction.createdBy ? `/profile/${instruction.createdBy}` : '#';
@@ -102,37 +107,46 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
 
       <div>
         <header className="flex items-center gap-3 p-5 border-b border-gray-100 bg-white/70 backdrop-blur-sm">
-          <Link href={profileLink}>
-            <div className="cursor-pointer">
-              {avatarUrl ? (
-                <Image
-                  src={`http://localhost:8000${avatarUrl}`}
-                  alt={authorName}
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover"
-                  onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-                  {authorName.slice(0, 1).toUpperCase()}
-                </div>
-              )}
-            </div>
-          </Link>
+          <div
+          className="w-12 h-12 rounded-full overflow-hidden bg-blue-200 flex items-center justify-center font-bold text-blue-600 cursor-pointer"
+          onClick={() => onProfileClick(instruction.createdBy)}
+        >
+          {avatarUrl ? (
+            <Image
+              src={`http://localhost:8000${avatarUrl}`}
+              alt={safeAuthorName}
+              width={48}
+              height={48}
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <span className="text-lg">
+              {typeof safeAuthorName === "string" && safeAuthorName.length > 0
+                ? safeAuthorName[0].toUpperCase()
+                : "👤"}
+            </span>
+          )}
+        </div>
+
           <div className="flex flex-col">
-            <Link href={profileLink}>
-              <span className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer">{authorName}</span>
-            </Link>
+            <span
+              className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer"
+              onClick={() => onProfileClick(instruction.createdBy)}
+            >
+              {safeAuthorName}
+            </span>
             <time className="text-sm text-slate-500">
-              Posted: {createdIso ? new Date(createdIso).toLocaleDateString("en-US", {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-              }) : "--"}
+              Posted: {createdIso
+                ? new Date(createdIso).toLocaleDateString("en-US", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : "--"}
             </time>
           </div>
         </header>
+
 
         <div className="p-5">
           <h3 className="font-bold text-lg mb-2 text-gray-900">{instruction.title}</h3>

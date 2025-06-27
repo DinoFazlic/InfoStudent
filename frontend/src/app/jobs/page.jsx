@@ -16,6 +16,9 @@ export default function JobsPage() {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentJobId, setCurrentJobId] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -224,24 +227,27 @@ useEffect(() => {
             .map((j) => (
 
             <JobCard
-              key={j.id}
-              job={{
-                ...j,
-                author_id: j.created_by,
-                authorName: j.author_name,
-                authorAvatarUrl: j.author_avatar_url,
-                createdAt: j.created_at,
-                canDelete: me && (me.role === "admin" || me.id === j.created_by),
-              }}
-              onApply={() => handleJobApplied(j.id)}
-              onSaveToggle={(id, nowSaved) => {
-                if (nowSaved) {
-                  setJobs((prev) => prev.filter((job) => job.id !== id));
-                }
-              }}
-              onEdit={() => handleEdit(j.id)}
-              onDelete={() => handleDelete(j.id)}
-            />
+                key={j.id}
+                job={{
+                  ...j,
+                  author_id: j.created_by,
+                  authorName: j.author_name,
+                  authorAvatarUrl: j.author_avatar_url,
+                  createdAt: j.created_at,
+                  canDelete: me && (me.role === "admin" || me.id === j.created_by),
+                }}
+                onApply={() => handleJobApplied(j.id)}
+                onSaveToggle={(id, nowSaved) => {
+                  if (nowSaved) {
+                    setJobs((prev) => prev.filter((job) => job.id !== id));
+                  }
+                }}
+                onEdit={() => handleEdit(j.id)}
+                onDelete={() => handleDelete(j.id)}
+                setSelectedUser={setSelectedUser}                
+                setShowProfilePopup={setShowProfilePopup}         
+              />
+
             ))}
           </div>
         )}
@@ -249,7 +255,7 @@ useEffect(() => {
       <Footer />
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">
             <button
               onClick={() => { setShowModal(false); resetForm(); }}
@@ -330,6 +336,28 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      {showProfilePopup && selectedUser && (
+          <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+            <div className="relative bg-white rounded-xl p-6 w-full max-w-3xl shadow-xl">
+              <button
+                onClick={() => {
+                  setShowProfilePopup(false);
+                  setSelectedUser(null);
+                }}
+                className="absolute top-3 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800"
+              >
+                &times;
+              </button>
+              <UserProfileCard user={selectedUser} />
+            </div>
+          </div>
+        )}
+
     </div>
+
+    
   );
+
+
 }

@@ -23,6 +23,8 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
   const [uploadNewCV, setUploadNewCV] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [appliedLocal, setAppliedLocal] = useState(job.applied || false);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+
 
   useEffect(() => {
     async function fetchUser() {
@@ -237,28 +239,42 @@ export default function JobCard({ job, onApply, onSaveToggle, onDelete, onEdit }
 
         <div>
           <header className="flex items-center gap-3 p-5 border-b border-gray-100 bg-white/70 backdrop-blur-sm">
-            <Link href={profileLink}>
-              <div className="cursor-pointer">
-  {avatarUrl ? (
-                  <Image
-      src={`http://localhost:8000${avatarUrl}`}
-      alt={authorName}
-      width={48}
-      height={48}
-      className="rounded-full object-cover"
-                    onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
-    />
-  ) : (
-    <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-                    {isEmployer ? <FaBuilding /> : <FaUser />}
-    </div>
-  )}
+            <div onClick={() => setShowProfilePopup(true)} className="cursor-pointer">
+            {avatarUrl ? (
+              <Image
+                src={`http://localhost:8000${avatarUrl}`}
+                alt={authorName}
+                width={48}
+                height={48}
+                className="rounded-full object-cover"
+                onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+                {isEmployer ? <FaBuilding /> : <FaUser />}
               </div>
-            </Link>
-  <div className="flex flex-col">
-              <Link href={profileLink}>
-                <span className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer">{authorName}</span>
-              </Link>
+            )}
+          </div>
+
+            <div className="flex flex-col">
+                        <span
+            onClick={() => {
+              if (onProfileClick) onProfileClick();
+              if (setSelectedUser && setShowProfilePopup) {
+                setSelectedUser({
+                  id: job.author_id,
+                  name: job.authorName,
+                  avatarUrl: job.authorAvatarUrl,
+                  role: job.authorRole,
+                });
+                setShowProfilePopup(true);
+              }
+            }}
+            className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer"
+          >
+            {authorName}
+          </span>
+
               <span className="text-xs text-slate-500">{job.author_email}</span>
               <time className="text-sm text-slate-500">
                 Posted: {formatDate(createdIso)}
