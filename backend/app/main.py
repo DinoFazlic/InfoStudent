@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import SQLModel
 import os
+from dotenv import load_dotenv
 
 from app import models             
 from app.database import engine
@@ -14,13 +15,15 @@ from app.websocket.chat_socket import websocket_chat
 from app.routes.internship_router import router as internship_router
 from app.routes import job_application_router
 from app.routes import job_saves_router
-from app.controllers import ai_controller, application_controller
+# (imported later after environment variables are loaded)
+from app.controllers import ai_controller, application_controller  # imported after env is loaded
 from app.routes.internship_application_router import router as internship_application_router
 from app.routes.internship_save_router import router as internship_save_router
 from app.routes import instruction_save_router
 from app.routes.application_router import router as application_router
 
-
+# Load env as early as possible
+load_dotenv()
 
 app = FastAPI()
 
@@ -70,6 +73,7 @@ app.include_router(internship_router)
 app.include_router(job_application_router.router)
 app.include_router(job_saves_router.router)
 app.include_router(ai_controller.router)
+# from app.controllers import ai_controller, application_controller
 app.include_router(internship_application_router)
 app.include_router(internship_save_router)
 app.include_router(instruction_save_router.router)

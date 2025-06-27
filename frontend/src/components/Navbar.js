@@ -58,6 +58,8 @@ export default function Navbar() {
     };
   }, []);
 
+  const isAuthenticated = roleLoaded && profileHref !== "/login";
+
   return (
     <nav className="bg-gray-200  h-[96px] sticky top-0 z-5000">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
@@ -75,28 +77,41 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center space-x-6 text-sm sm:text-lg font-medium text-gray-700 ">
+        <div className="flex items-center space-x-6 text-gray-700 font-medium">
           <div className="hidden md:flex space-x-6 items-center">
-            <Link href="/chat" className="nav-link-underline transition">Chats</Link>
+            {isAuthenticated && (
+              <Link href="/chat" className="nav-link-underline transition">Chats</Link>
+            )}
             <Link href="/jobs" className="nav-link-underline transition">Jobs</Link>
             <Link href="/instructions" className="nav-link-underline transition">Instructions</Link>
             <Link href="/internships" className="nav-link-underline transition">Internships</Link>
           </div>
 
           {roleLoaded && (
-            <Link href={profileHref}>
-              {profilePic ? (
-                <img
-                  src={profilePic}
-                  alt="Profile"
-                  className="w-[45px] h-[45px] aspect-square object-cover rounded-full cursor-pointer border border-gray-300 hover:border-blue-500 transition"
-                />
-              ) : (
-                <div className="w-[45px] h-[45px] flex items-center justify-center rounded-full border border-gray-300 hover:border-blue-500 transition cursor-pointer text-gray-600 bg-gray-100">
-                  <FiUser size={20} />
-                </div>
-              )}
-            </Link>
+            isAuthenticated ? (
+              <Link href={profileHref}>
+                {profilePic ? (
+                  <img
+                    src={profilePic}
+                    alt="Profile"
+                    className="w-[45px] h-[45px] aspect-square object-cover rounded-full cursor-pointer border border-gray-300 hover:border-blue-500 transition"
+                  />
+                ) : (
+                  <div className="w-[45px] h-[45px] flex items-center justify-center rounded-full border border-gray-300 hover:border-blue-500 transition cursor-pointer text-gray-600 bg-gray-100">
+                    <FiUser size={20} />
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <div className="hidden md:flex items-center gap-4">
+                <Link href="/login">
+                  <button className="px-4 py-2 bg-cyan-900 text-white rounded hover:bg-cyan-700 transition">Log in</button>
+                </Link>
+                <Link href="/register">
+                  <button className="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition">Register</button>
+                </Link>
+              </div>
+            )
           )}
 
           <button
@@ -121,10 +136,22 @@ export default function Navbar() {
           isMenuOpen ? "opacity-100 translate-y-0" : "hidden"
         }`}
       >
-        <Link href="/chat" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Chats</Link>
+        {isAuthenticated && (
+          <Link href="/chat" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Chats</Link>
+        )}
         <Link href="/jobs" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Jobs</Link>
         <Link href="/instructions" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Instructions</Link>
         <Link href="/internships" className="nav-link-underline transition" onClick={() => setIsMenuOpen(false)}>Internships</Link>
+        {!isAuthenticated && (
+          <>
+            <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+              <button className="w-full py-2 bg-cyan-900 text-white rounded hover:bg-cyan-700 transition">Log in</button>
+            </Link>
+            <Link href="/register" onClick={() => setIsMenuOpen(false)}>
+              <button className="w-full bg-cyan-600 text-white py-2 rounded hover:bg-cyan-700 transition">Register</button>
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );
