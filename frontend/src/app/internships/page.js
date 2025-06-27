@@ -166,56 +166,62 @@ export default function InternshipsPage() {
       <NavBar />
 
       <div className="container mx-auto flex-1 px-4 pt-6 pb-10">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-amber-600">Internships</h1>
 
-          <div className="flex flex-col md:flex-row gap-4 mt-4">
-            <input
-              type="text"
-              placeholder="Search internships..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-1/3 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
-            />
-            <select
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              className="w-full md:w-1/3 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
-            >
-              <option value="">All locations</option>
-              {allLocations.map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc}
-                </option>
-              ))}
-            </select>
-            <select
-              value={minStipend}
-              onChange={(e) => setMinStipend(e.target.value)}
-              className="w-full md:w-1/3 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
-            >
-              <option value="">All stipends</option>
-              <option value="100">100 KM+</option>
-              <option value="300">300 KM+</option>
-              <option value="500">500 KM+</option>
-              <option value="700">700 KM+</option>
-              <option value="1000">1000 KM+</option>
-            </select>
-          </div>
+        <div className="mb-6">
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <h1 className="text-3xl font-bold text-amber-600">Internships</h1>
 
+    <div className="flex flex-col md:flex-row md:items-end gap-4 w-full md:w-auto">
 
-          {!loading && (me?.role === "employer" || me?.role === "admin") && (
-            <button
-              onClick={() => {
-                resetForm();
-                setShowAddEditModal(true);
-              }}
-              className="flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-white text-base font-semibold hover:bg-amber-600"
-            >
-              <span className="text-lg flex items-center justify-center">+</span> Add Internship
-            </button>
-          )}
-        </div>
+      <input
+        type="text"
+        placeholder="Search internships..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full md:w-[220px] px-4 py-2 h-10 border rounded-md shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+      />
+
+      <select
+        value={locationFilter}
+        onChange={(e) => setLocationFilter(e.target.value)}
+        className="w-full md:w-[220px] px-4 py-2 h-10 border rounded-md shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+      >
+        <option value="">All locations</option>
+        {allLocations.map((loc) => (
+          <option key={loc} value={loc}>
+            {loc}
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={minStipend}
+        onChange={(e) => setMinStipend(e.target.value)}
+        className="w-full md:w-[220px] px-4 py-2 h-10 border rounded-md shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+      >
+        <option value="">All stipends</option>
+        <option value="100">100 KM+</option>
+        <option value="300">300 KM+</option>
+        <option value="500">500 KM+</option>
+        <option value="700">700 KM+</option>
+        <option value="1000">1000 KM+</option>
+      </select>
+
+      {!loading && (me?.role === "employer" || me?.role === "admin") && (
+        <button
+          onClick={() => {
+            resetForm();
+            setShowAddEditModal(true);
+          }}
+          className="h-10 px-6 rounded-md bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 whitespace-nowrap"
+        >
+          + Add Internship
+        </button>
+      )}
+    </div>
+  </div>
+</div>
+
 
         {loading ? (
           <p className="text-center text-slate-600">Loading…</p>

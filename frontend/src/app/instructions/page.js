@@ -108,59 +108,50 @@ export default function InstructionsPage() {
       <NavBar />
       <main className="flex-1 container mx-auto px-4 pt-6 pb-12">
       
-    <div className="mb-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
-        <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
+      <div className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
 
-        <button
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700 self-start md:self-auto"
-        >
-          <span className="text-lg flex items-center justify-center">+</span> Add Instruction
-        </button>
+            <div className="flex flex-col md:flex-row md:items-end gap-4 w-full md:w-auto">
+
+              <input
+                type="text"
+                placeholder="Search by subject or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full md:w-[220px] px-4 py-2 h-10 rounded-md border border-gray-300 shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+              />
+
+              <select
+                value={minHourlyRate}
+                onChange={(e) => setMinHourlyRate(e.target.value)}
+                className="w-full md:w-[220px] px-4 py-2 h-10 rounded-md border border-gray-300 shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+              >
+
+                <option value="">All hourly rates</option>
+                <option value="10">10 KM/h+</option>
+                <option value="20">20 KM/h+</option>
+                <option value="30">30 KM/h+</option>
+                <option value="40">40 KM/h+</option>
+              </select>
+
+
+              {me && (
+                <button
+                  onClick={() => {
+                    resetForm();
+                    setShowModal(true);
+                  }}
+                  className="h-10 px-6 rounded-md bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 whitespace-nowrap"
+>
+                  + Add Instruction
+                </button>
+              )}
+            </div>
+          </div>
       </div>
 
-      <div className="flex justify-end mt-2 gap-3 flex-wrap">
-        <input
-          type="text"
-          placeholder="Search by subject or description..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-60 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-        <select
-          value={minHourlyRate}
-          onChange={(e) => setMinHourlyRate(e.target.value)}
-          className="w-60 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">All rates</option>
-          <option value="10">10 KM+</option>
-          <option value="20">20 KM+</option>
-          <option value="30">30 KM+</option>
-          <option value="40">40 KM+</option>
-        </select>
-      </div>
-    </div>
 
-
-
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
-          {me && (
-          <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700"
-          >
-            <span className="text-lg flex items-center justify-center">+</span> Add Instruction
-          </button>
-          )}
-        </div>
 
         {loading ? (
           <p className="text-center text-slate-600">Loading…</p>

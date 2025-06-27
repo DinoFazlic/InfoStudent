@@ -146,59 +146,65 @@ useEffect(() => {
       <NavBar />
 
       <div className="container mx-auto flex-1 px-4 pt-6 pb-10">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-amber-600">Job Listings</h1>
 
-          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <input
-              type="text"
-              placeholder="Search by title or description..."
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-1/2 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
-            />
-            <select
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              className="w-full md:w-1/4 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
-            >
-              <option value="">All locations</option>
-              {allLocations.map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc}
-                </option>
-              ))}
-            </select>
+        <div className="mb-6">
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <h1 className="text-3xl font-bold text-amber-600">Job Listings</h1>
+
+    <div className="flex flex-col md:flex-row md:items-end gap-4 w-full md:w-auto">
+
+      <input
+        type="text"
+        placeholder="Search by title or description..."
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full md:w-[220px] px-4 py-2 h-10 border rounded-md shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+      />
+
+      <select
+        value={locationFilter}
+        onChange={(e) => setLocationFilter(e.target.value)}
+        className="w-full md:w-[220px] px-4 py-2 h-10 border rounded-md shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+      >
+        <option value="">All locations</option>
+        {allLocations.map((loc) => (
+          <option key={loc} value={loc}>
+            {loc}
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={minPrice}
+        onChange={(e) => setMinPrice(e.target.value)}
+        className="w-full md:w-[220px] px-4 py-2 h-10 border rounded-md shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+      >
+        <option value="">All hourly rates</option>
+        <option value="10">10 KM/h+</option>
+        <option value="15">15 KM/h+</option>
+        <option value="20">20 KM/h+</option>
+        <option value="25">25 KM/h+</option>
+        <option value="30">30 KM/h+</option>
+        <option value="35">35 KM/h+</option>
+      </select>
+
+      {!loading && (me?.role === "employer" || me?.role === "admin") && (
+        <button
+          onClick={() => {
+            resetForm();
+            setShowModal(true);
+          }}
+          className="h-10 px-6 rounded-md bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 whitespace-nowrap"
+        >
+          + Add Job
+        </button>
+      )}
+
+    </div>
+  </div>
+</div>
 
 
-            <select
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              className="w-full md:w-1/4 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
-            >
-              <option value="">All hourly rates</option>
-              <option value="10">10 KM/h+</option>
-              <option value="15">15 KM/h+</option>
-              <option value="20">20 KM/h+</option>
-              <option value="25">25 KM/h+</option>
-              <option value="30">30 KM/h+</option>
-              <option value="35">35 KM/h+</option>
-            </select>
 
-          </div>
-
-
-          {!loading && (me?.role === "employer" || me?.role === "admin") && (
-            <button
-              onClick={() => {
-                resetForm();
-                setShowModal(true);
-              }}
-              className="flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-white text-base font-semibold hover:bg-amber-600"
-            >
-              <span className="text-lg flex items-center justify-center">+</span> {isEditMode ? "Edit Job" : "Add Job"}
-            </button>
-          )}
-        </div>
 
         {loading ? (
           <p className="text-center text-slate-600">Loading…</p>
@@ -206,7 +212,7 @@ useEffect(() => {
           <div className="text-center py-12">
             <div className="max-w-md mx-auto">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">No job postings available</h3>
-              <p className="text-gray-600 mb-6">Sign in or register to access more features and apply for jobs.</p>
+              
               <Link href="/login" className="inline-flex items-center px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors">
                 Login or Register
               </Link>
