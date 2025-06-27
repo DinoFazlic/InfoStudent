@@ -27,8 +27,9 @@ export default function InstructionsPage() {
     subject: "",
     description: "",
     hourly_rate: "",
-    contact_info: "",
   });
+
+  const DESC_MAX = 300;
 
   useEffect(() => {
     async function fetchInstructions() {
@@ -64,7 +65,6 @@ export default function InstructionsPage() {
       subject: inst.subject ?? "",
       description: inst.description,
       hourly_rate: inst.hourly_rate ?? "",
-      contact_info: inst.contact_info ?? "",
     });
     setIsEditMode(true);
     setCurrentId(id);
@@ -78,8 +78,8 @@ export default function InstructionsPage() {
     setSaving(true);
     try {
       const payload = { ...form };
+      payload.description = payload.description.slice(0, DESC_MAX);
       if (payload.hourly_rate === "") delete payload.hourly_rate;
-      if (payload.contact_info === "") delete payload.contact_info;
       if (payload.subject === "") delete payload.subject;
 
       if (isEditMode && currentId) {
@@ -98,7 +98,7 @@ export default function InstructionsPage() {
   }
 
   const resetForm = () => {
-    setForm({ title: "", subject: "", description: "", hourly_rate: "", contact_info: "" });
+    setForm({ title: "", subject: "", description: "", hourly_rate: "" });
     setIsEditMode(false);
     setCurrentId(null);
   };
@@ -108,43 +108,48 @@ export default function InstructionsPage() {
       <NavBar />
       <main className="flex-1 container mx-auto px-4 pt-6 pb-12">
       
-    <div className="mb-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
-        <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
+      <div className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
 
-        <button
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700 self-start md:self-auto"
-        >
-          <span className="text-lg flex items-center justify-center">+</span> Add Instruction
-        </button>
+            <div className="flex flex-col md:flex-row md:items-end gap-4 w-full md:w-auto">
+
+              <input
+                type="text"
+                placeholder="Search by subject or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full md:w-[220px] px-4 py-2 h-10 rounded-md border border-gray-300 shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+              />
+
+              <select
+                value={minHourlyRate}
+                onChange={(e) => setMinHourlyRate(e.target.value)}
+                className="w-full md:w-[220px] px-4 py-2 h-10 rounded-md border border-gray-300 shadow-sm text-sm focus:ring-amber-500 focus:border-amber-500"
+              >
+
+                <option value="">All hourly rates</option>
+                <option value="10">10 KM/h+</option>
+                <option value="20">20 KM/h+</option>
+                <option value="30">30 KM/h+</option>
+                <option value="40">40 KM/h+</option>
+              </select>
+
+
+              {me && (
+                <button
+                  onClick={() => {
+                    resetForm();
+                    setShowModal(true);
+                  }}
+                  className="h-10 px-6 rounded-md bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 whitespace-nowrap"
+>
+                  + Add Instruction
+                </button>
+              )}
+            </div>
+          </div>
       </div>
-
-      <div className="flex justify-end mt-2 gap-3 flex-wrap">
-        <input
-          type="text"
-          placeholder="Search by subject or description..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-60 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-        <select
-          value={minHourlyRate}
-          onChange={(e) => setMinHourlyRate(e.target.value)}
-          className="w-60 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">All rates</option>
-          <option value="10">10 KM+</option>
-          <option value="20">20 KM+</option>
-          <option value="30">30 KM+</option>
-          <option value="40">40 KM+</option>
-        </select>
-      </div>
-    </div>
-
 
 
 
@@ -197,7 +202,7 @@ export default function InstructionsPage() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">
             <button
               onClick={() => { setShowModal(false); resetForm(); }}
@@ -239,9 +244,11 @@ export default function InstructionsPage() {
                   name="description"
                   value={form.description}
                   onChange={onField}
+                  maxLength={DESC_MAX}
                   rows={4}
                   className="w-full rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                 />
+                <p className="text-xs text-right text-gray-500">{form.description.length}/{DESC_MAX}</p>
               </div>
 
               <div>
@@ -252,16 +259,6 @@ export default function InstructionsPage() {
                   min="0"
                   name="hourly_rate"
                   value={form.hourly_rate}
-                  onChange={onField}
-                  className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Contact Info</label>
-                <input
-                  name="contact_info"
-                  value={form.contact_info}
                   onChange={onField}
                   className="w-full h-12 rounded-md border-gray-300 shadow-sm px-4 py-3 text-base focus:border-blue-500 focus:ring-blue-500"
                 />

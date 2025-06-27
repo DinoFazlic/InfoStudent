@@ -4,13 +4,14 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
+
 import { toast } from "react-hot-toast";
 import { getMe } from "@/utils/api/auth";
-import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaBuilding, FaUser, FaCoins, FaEdit, FaTrashAlt, FaBookmark, FaRegBookmark, FaEnvelope } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaBuilding, FaUser, FaCoins, FaEdit, FaTrashAlt, FaBookmark, FaRegBookmark, FaEnvelope, FaLightbulb, FaSpinner } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
 import { saveInternship, unsaveInternship } from "@/utils/api/internships";
 
-export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, onEdit }) {
+export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, onEdit, setSelectedUser, setShowProfilePopup }) {
   const router = useRouter();
   const [me, setMe] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -21,6 +22,10 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [hidden, setHidden] = useState(false);
+  const [appliedLocal, setAppliedLocal] = useState(applied);
+  const [aiInsight, setAiInsight] = useState("");
+  const [loadingInsight, setLoadingInsight] = useState(false);
+  const [showInsightModal, setShowInsightModal] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -113,7 +118,8 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
       router.push("/login");
       return;
     }
-    router.push(`/internships/${item.id}/apply`);
+    if (appliedLocal) return;
+    setAppliedLocal(true);
   };
 
   const handleMessage = () => {
@@ -121,6 +127,24 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
       router.push(`/chat/${item.author_id}`);
     } else {
       toast.error("Cannot message, no user found.");
+    }
+  };
+
+  const fetchInsight = async () => {
+    if (!item.description) {
+      toast.error("Internship description is missing. Cannot generate AI Insight.");
+      return;
+    }
+    setLoadingInsight(true);
+    try {
+      const response = await axios.post("http://localhost:8000/ai/insight", { description: item.description }, { withCredentials: true });
+      setAiInsight(response.data.insight);
+      setShowInsightModal(true);
+    } catch (err) {
+      console.error("AI Insight error:", err);
+      toast.error("Could not fetch AI Insight.");
+    } finally {
+      setLoadingInsight(false);
     }
   };
 
@@ -156,29 +180,42 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
             >
               {saved ? <FaBookmark /> : <FaRegBookmark />}
             </button>
+            <button
+              onClick={fetchInsight}
+              disabled={loadingInsight}
+              className="text-lg font-bold text-purple-500 hover:text-purple-700"
+              title={loadingInsight ? "Generating Insight..." : "AI Insight"}
+            >
+              {loadingInsight ? <FaSpinner className="animate-spin" /> : <FaLightbulb />}
+            </button>
           </div>
         )}
 
         <div>
             <header className="flex items-center gap-3 p-5 border-b border-gray-100 bg-white/70 backdrop-blur-sm">
-                <Link href={profileLink}>
-                    <div className="cursor-pointer">
-                        {avatarUrl ? (
-                            <Image
-                                src={`http://localhost:8000${avatarUrl}`}
-                                alt={authorName}
-                                width={48}
-                                height={48}
-                                className="rounded-full object-cover"
-                                onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
-                            />
-                        ) : (
-                            <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-                                {isEmployer ? <FaBuilding /> : <FaUser />}
-                            </div>
-                        )}
-                    </div>
-                </Link>
+                <div
+            onClick={() => {
+              setSelectedUser(item.author_id);   // ili job.author_id ako se tako zove
+              setShowProfilePopup(true);
+            }}
+            className="cursor-pointer"
+          >
+            {avatarUrl ? (
+              <Image
+                src={`http://localhost:8000${avatarUrl}`}
+                alt={authorName}
+                width={48}
+                height={48}
+                className="rounded-full object-cover"
+                onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+                {isEmployer ? <FaBuilding /> : <FaUser />}
+              </div>
+            )}
+          </div>
+
                 <div className="flex flex-col">
                     <Link href={profileLink}>
                         <span className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer">{authorName}</span>
@@ -228,12 +265,21 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
                     </button>
                 ) : me.role === "student" ? (
                     <div className="flex gap-3">
-                        <button
-                            onClick={handleApplyClick}
-                            className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-2 px-4 rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
-                        >
-                            Apply Now
-                        </button>
+                        {appliedLocal ? (
+                          <button
+                              disabled
+                              className="flex-1 bg-gray-300 text-gray-600 py-2 px-4 rounded-lg cursor-default flex items-center justify-center gap-2"
+                          >
+                              Applied
+                          </button>
+                        ) : (
+                          <button
+                              onClick={handleApplyClick}
+                              className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-2 px-4 rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                          >
+                              Apply Now
+                          </button>
+                        )}
                         <button
                             onClick={handleMessage}
                             className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 px-4 rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-200 flex items-center justify-center gap-2"
@@ -284,6 +330,20 @@ export default function InternshipCard({ item, onApply, onSaveToggle, onDelete, 
                 <button onClick={() => confirmApply(false)} disabled={!selectedFile} className="w-full rounded bg-indigo-600 text-white py-2 hover:bg-indigo-500 disabled:opacity-50">Upload CV and Apply</button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {showInsightModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl space-y-4 relative">
+            <button onClick={() => setShowInsightModal(false)} className="absolute right-4 top-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            <h2 className="text-xl font-semibold text-center text-indigo-600">
+              AI Insight for {item.title}
+            </h2>
+            <div className="prose max-w-none max-h-96 overflow-y-auto whitespace-pre-wrap text-sm">
+              {aiInsight}
+            </div>
           </div>
         </div>
       )}

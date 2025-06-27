@@ -10,6 +10,9 @@ export default function UserProfilePopup({ userId, onClose }) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
+  const [studentInstructions, setStudentInstructions] = useState([]);
+
+
 
   const fetchUser = () => {
     if (!userId) return;
@@ -47,6 +50,17 @@ export default function UserProfilePopup({ userId, onClose }) {
     return () => {
       document.body.style.overflow = "auto";
     };
+
+    }, [userId]);
+    useEffect(() => {
+    if (!userId) return;
+    axios
+      .get("http://localhost:8000/api/instructions", { withCredentials: true })
+      .then((res) => {
+        const filtered = res.data.filter((ins) => ins.created_by === userId);
+        setStudentInstructions(filtered);
+      })
+      .catch(() => setStudentInstructions([]));
   }, [userId]);
 
   const handleReviewSubmit = async () => {
@@ -71,13 +85,33 @@ export default function UserProfilePopup({ userId, onClose }) {
     }
   };
 
+    const [employerJobs, setEmployerJobs] = useState([]);
+    const [employerInternships, setEmployerInternships] = useState([]);
+
+    useEffect(() => {
+      if (!userId) return;
+      axios.get("http://localhost:8000/api/jobs", { withCredentials: true })
+        .then((res) => {
+          const filtered = res.data.filter((job) => job.created_by === userId);
+          setEmployerJobs(filtered);
+        })
+        .catch(() => setEmployerJobs([]));
+
+      axios.get("http://localhost:8000/api/internships", { withCredentials: true })
+        .then((res) => {
+          const filtered = res.data.filter((intern) => intern.created_by === userId);
+          setEmployerInternships(filtered);
+        })
+        .catch(() => setEmployerInternships([]));
+    }, [userId]);
+
+
   if (!userId || !data) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[5000] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto font-sans p-0">
 
-        {/* HEADER */}
         <div className="bg-blue-700 text-white flex justify-between items-center px-6 py-4 rounded-t-2xl">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             👤 {data.first_name} {data.last_name}
@@ -87,7 +121,7 @@ export default function UserProfilePopup({ userId, onClose }) {
           </button>
         </div>
 
-        {/* AVATAR */}
+  
         <div className="flex justify-center mt-4">
           {data.avatar_url ? (
             <img
@@ -102,7 +136,7 @@ export default function UserProfilePopup({ userId, onClose }) {
           )}
         </div>
 
-        {/* BASIC INFO */}
+
         <div className="p-6 text-center space-y-1 text-gray-700 text-sm">
           <p>📧 <span className="font-medium">{data.email}</span></p>
           <p>📍 <span className="font-medium">{data.city}</span></p>
@@ -122,7 +156,6 @@ export default function UserProfilePopup({ userId, onClose }) {
           </div>
         </div>
 
-        {/* STUDENT INFO */}
         {data.biography && (
           <div className="bg-blue-50 px-6 py-4 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-blue-800 mb-2">🎓 Student Information</h3>
@@ -168,7 +201,7 @@ export default function UserProfilePopup({ userId, onClose }) {
           </div>
         )}
 
-        {/* EMPLOYER INFO */}
+    
         {data.company_name && (
           <div className="bg-blue-50 px-6 py-4 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-blue-800 mb-2">🏢 Employer Information</h3>
@@ -186,7 +219,47 @@ export default function UserProfilePopup({ userId, onClose }) {
           </div>
         )}
 
-        {/* AVAILABILITY */}
+        {data.role === "employer" && (
+  <div className="px-6 pt-4 pb-6 space-y-6">
+
+
+    {employerJobs.length > 0 && (
+      <div>
+        <h3 className="text-lg font-semibold text-blue-800 mb-2">🧰 Jobs Posted</h3>
+        <div className="space-y-3">
+          {employerJobs.map((job) => (
+            <div key={job.id} className="border border-gray-200 rounded-lg p-3 shadow-sm bg-white">
+              <h4 className="font-semibold text-gray-800">{job.title}</h4>
+              <p className="text-sm text-gray-600 line-clamp-2">{job.description}</p>
+              {job.location && <p className="text-xs text-gray-500">📍 {job.location}</p>}
+              {job.price && <p className="text-xs text-gray-500">💰 {job.price} KM/h</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+        
+        {employerInternships.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-blue-800 mb-2">🎓 Internships Posted</h3>
+            <div className="space-y-3">
+              {employerInternships.map((intern) => (
+                <div key={intern.id} className="border border-gray-200 rounded-lg p-3 shadow-sm bg-white">
+                  <h4 className="font-semibold text-gray-800">{intern.title}</h4>
+                  <p className="text-sm text-gray-600 line-clamp-2">{intern.description}</p>
+                  {intern.location && <p className="text-xs text-gray-500">📍 {intern.location}</p>}
+                  {intern.stipend && <p className="text-xs text-gray-500">💰 {intern.stipend} KM</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+
+
+
         {data.availability?.length > 0 && (
           <div className="bg-blue-50 px-6 py-4 border-t border-gray-200">
             <h4 className="text-base font-semibold text-blue-700 mb-2">📅 Weekly Availability</h4>
@@ -228,8 +301,8 @@ export default function UserProfilePopup({ userId, onClose }) {
           </div>
         )}
 
-        {/* REVIEWS */}
-        <div className="px-6 pt-6">
+
+        <div className="px-6 pt-6 pb-6">
           <h3 className="text-lg font-bold text-blue-800 mb-2 border-b pb-1 border-blue-100">📣 Reviews</h3>
           {averageRating !== null && (
             <p className="text-sm text-gray-800 mb-2">⭐ {averageRating}/5 from {reviews.length} review{reviews.length !== 1 ? "s" : ""}</p>
@@ -249,7 +322,24 @@ export default function UserProfilePopup({ userId, onClose }) {
           </div>
         </div>
 
-        {/* LEAVE A REVIEW */}
+              {studentInstructions.length > 0 && (
+        <div className="bg-blue-50 pt-4 px-6 py-6 border-t border-gray-200">
+          <h3 className="text-lg font-semibold text-blue-800 mb-4">📚 Instructions Given</h3>
+          <div className="space-y-3">
+            {studentInstructions.map((ins) => (
+              <div
+                key={ins.id}
+                className="bg-white border border-blue-100 rounded-lg p-4 shadow-sm"
+              >
+                <h4 className="text-blue-700 font-semibold text-sm mb-1">{ins.title}</h4>
+                <p className="text-sm text-gray-700">{ins.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
         <div className="p-6 border-t border-gray-200 text-center space-y-4">
           <button
             onClick={() => setShowReviewForm(true)}

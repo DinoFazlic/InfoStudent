@@ -123,7 +123,7 @@ export default function HomePageLayout() {
 
 function FeatureCard({ title, description, role }) {
   const baseRoute = title.toLowerCase();
-  const href = role ? `/${role}s/${baseRoute}` : `/landing/${baseRoute}`;
+  const href = `/${baseRoute}`;
 
   return (
     <Link href={href} className="block h-full">

@@ -219,7 +219,7 @@ export default function EmployerPostsSection({ posts, setEmployerPosts }) {
       )}
 
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">
             <button
               onClick={() => setShowEditModal(false)}
