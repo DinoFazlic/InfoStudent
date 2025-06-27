@@ -7,10 +7,10 @@ import { getMe } from "@/utils/api/auth";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
 import { FaEdit, FaTrashAlt, FaEnvelope, FaPhoneAlt, FaBookmark, FaRegBookmark, FaGraduationCap, FaClock } from 'react-icons/fa';
+import Link from "next/link";
 
 export default function InstructionCard({ instruction, onSaveToggle, onEdit, onDelete }) {
   const [hidden, setHidden] = useState(false);
-  const [loadingInsight, setLoadingInsight] = useState(false);
   const [me, setMe] = useState(null);
   const [saving, setSaving] = useState(false);
   const [messaging, setMessaging] = useState(false);
@@ -30,6 +30,8 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
   const authorName = instruction.company_name || instruction.authorName || "Unknown";
   const avatarUrl = instruction.authorAvatarUrl ?? null;
   const createdIso = instruction.createdAt ?? null;
+  const profileLink = instruction.createdBy ? `/profile/${instruction.createdBy}` : '#';
+  const isEmployer = instruction.company_name && instruction.company_name.trim() !== '';
 
   const handleSave = async () => {
     setSaving(true);
@@ -100,22 +102,28 @@ export default function InstructionCard({ instruction, onSaveToggle, onEdit, onD
 
       <div>
         <header className="flex items-center gap-3 p-5 border-b border-gray-100 bg-white/70 backdrop-blur-sm">
-          {avatarUrl ? (
-            <Image
-              src={`http://localhost:8000${avatarUrl}`}
-              alt={authorName}
-              width={48}
-              height={48}
-              className="rounded-full object-cover"
-              onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
-              {authorName.slice(0, 1).toUpperCase()}
+          <Link href={profileLink}>
+            <div className="cursor-pointer">
+              {avatarUrl ? (
+                <Image
+                  src={`http://localhost:8000${avatarUrl}`}
+                  alt={authorName}
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover"
+                  onError={(e) => { e.target.onerror = null; e.target.src = "/default-avatar.png"; }}
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-600">
+                  {authorName.slice(0, 1).toUpperCase()}
+                </div>
+              )}
             </div>
-          )}
+          </Link>
           <div className="flex flex-col">
-            <span className="font-semibold text-gray-800">{authorName}</span>
+            <Link href={profileLink}>
+              <span className="font-semibold text-gray-800 hover:text-amber-600 cursor-pointer">{authorName}</span>
+            </Link>
             <time className="text-sm text-slate-500">
               Posted: {createdIso ? new Date(createdIso).toLocaleDateString("en-US", {
                 day: '2-digit',
