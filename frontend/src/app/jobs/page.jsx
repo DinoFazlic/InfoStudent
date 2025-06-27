@@ -16,6 +16,11 @@ export default function JobsPage() {
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentJobId, setCurrentJobId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [uniqueLocations, setUniqueLocations] = useState([]);
+  const [allLocations, setAllLocations] = useState([]);
 
   const [form, setForm] = useState({
     title: "",
@@ -26,18 +31,51 @@ export default function JobsPage() {
 
   const [me, setMe] = useState(null);
 
+  
+
   useEffect(() => {
-    (async () => {
-      const user = await getMe().catch(() => null);
-      setMe(user);
-      const allJobs = await listJobs().catch(() => []);
-      const visibleJobs = user?.role === "student"
-        ? allJobs.filter((job) => !job.applied)
-        : allJobs;
-      setJobs(visibleJobs);
-      setLoading(false);
-    })();
-  }, []);
+  async function fetchJobs() {
+    setLoading(true);
+    const user = await getMe().catch(() => null);
+    setMe(user);
+
+    const filters = {
+      search: searchQuery || undefined,
+      location: locationFilter || undefined,
+      min_price: minPrice || undefined,
+    };
+
+    const allJobs = await listJobs(filters).catch(() => []);
+    const visibleJobs = user?.role === "student"
+      ? allJobs.filter((job) => !job.applied)
+      : allJobs;
+
+    setJobs(visibleJobs);
+
+    // Za dropdown lokacije (po svim poslodavcima)
+    const locations = [...new Set(allJobs.map((j) => j.location).filter(Boolean))];
+    setUniqueLocations(locations);
+
+    setLoading(false);
+  }
+
+  fetchJobs();
+}, [searchQuery, locationFilter, minPrice]);
+
+
+
+useEffect(() => {
+  async function fetchAllLocations() {
+    const jobs = await listJobs(); // bez filtera
+    const locations = [...new Set(jobs.map((j) => j.location).filter(Boolean))];
+    setAllLocations(locations);
+  }
+
+  fetchAllLocations();
+}, []);
+
+
+
 
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -111,6 +149,44 @@ export default function JobsPage() {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-amber-600">Job Listings</h1>
 
+          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <input
+              type="text"
+              placeholder="Search by title or description..."
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full md:w-1/2 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            />
+            <select
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="w-full md:w-1/4 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            >
+              <option value="">All locations</option>
+              {allLocations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+
+
+            <select
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="w-full md:w-1/4 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            >
+              <option value="">All hourly rates</option>
+              <option value="10">10 KM/h+</option>
+              <option value="15">15 KM/h+</option>
+              <option value="20">20 KM/h+</option>
+              <option value="25">25 KM/h+</option>
+              <option value="30">30 KM/h+</option>
+              <option value="35">35 KM/h+</option>
+            </select>
+
+          </div>
+
+
           {!loading && (me?.role === "employer" || me?.role === "admin") && (
             <button
               onClick={() => {
@@ -138,7 +214,9 @@ export default function JobsPage() {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {jobs.map((j) => (
+            {jobs
+            .map((j) => (
+
             <JobCard
               key={j.id}
               job={{

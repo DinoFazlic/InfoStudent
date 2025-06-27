@@ -17,7 +17,10 @@ export default function InstructionsPage() {
   const [currentId, setCurrentId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [me, setMe] = useState(null);
-  const [selectedUserId, setSelectedUserId] = useState(null); 
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [minHourlyRate, setMinHourlyRate] = useState("");
+
 
   const [form, setForm] = useState({
     title: "",
@@ -28,13 +31,25 @@ export default function InstructionsPage() {
   });
 
   useEffect(() => {
-    (async () => {
+    async function fetchInstructions() {
+      setLoading(true);
       const user = await getMe().catch(() => null);
       setMe(user);
-      setRows(await listInstructions().catch(() => []));
+
+      const filters = {
+        search: searchQuery || undefined,
+        min_hourly_rate: minHourlyRate || undefined,
+      };
+
+      const data = await listInstructions(filters).catch(() => []);
+      setRows(data);
       setLoading(false);
-    })();
-  }, []);
+    }
+
+    fetchInstructions();
+  }, [searchQuery, minHourlyRate]);
+
+
 
   async function handleDelete(id) {
     await deleteInstruction(id);
@@ -92,18 +107,46 @@ export default function InstructionsPage() {
     <div className="min-h-screen flex flex-col bg-white">
       <NavBar />
       <main className="flex-1 container mx-auto px-4 pt-6 pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
-          <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700"
-          >
-            <span className="text-lg flex items-center justify-center">+</span> Add Instruction
-          </button>
-        </div>
+      
+    <div className="mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
+        <h1 className="text-3xl font-bold text-slate-900">Instructions</h1>
+
+        <button
+          onClick={() => {
+            resetForm();
+            setShowModal(true);
+          }}
+          className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-white text-base font-semibold hover:bg-blue-700 self-start md:self-auto"
+        >
+          <span className="text-lg flex items-center justify-center">+</span> Add Instruction
+        </button>
+      </div>
+
+      <div className="flex justify-end mt-2 gap-3 flex-wrap">
+        <input
+          type="text"
+          placeholder="Search by subject or description..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-60 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+        <select
+          value={minHourlyRate}
+          onChange={(e) => setMinHourlyRate(e.target.value)}
+          className="w-60 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">All rates</option>
+          <option value="10">10 KM+</option>
+          <option value="20">20 KM+</option>
+          <option value="30">30 KM+</option>
+          <option value="40">40 KM+</option>
+        </select>
+      </div>
+    </div>
+
+
+
 
         {loading ? (
           <p className="text-center text-slate-600">Loading…</p>

@@ -1,12 +1,20 @@
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export async function listInternships() {
-  const r = await fetch(`${BASE}/api/internships`, {
+export async function listInternships(filters = {}) {
+  const query = new URLSearchParams();
+
+  if (filters.search) query.append("search", filters.search);
+  if (filters.location) query.append("location", filters.location);
+  if (filters.min_stipend) query.append("min_stipend", filters.min_stipend);
+
+  const res = await fetch(`${BASE}/api/internships?${query.toString()}`, {
     credentials: "include"
   });
-  if (!r.ok) throw new Error("Fetch internships failed: " + r.status);
-  return r.json();
+
+  if (!res.ok) throw new Error("Fetch internships failed: " + res.status);
+  return res.json();
 }
+
 
 export async function createInternship(data) {
   const r = await fetch(`${BASE}/api/internships`, {

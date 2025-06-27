@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_current_user_optional, get_current_user
@@ -13,8 +13,26 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 def list_jobs(
     db: Session = Depends(get_db),
     user: Optional[User] = Depends(get_current_user_optional),
+    search: Optional[str] = Query(None),
+    location: Optional[str] = Query(None),
+    min_price: Optional[float] = Query(None),
 ):
-    rows = db.query(Job).order_by(Job.created_at.desc()).all()
+    query = db.query(Job)
+
+    if search:
+        query = query.filter(
+            (Job.title.ilike(f"%{search}%")) |
+            (Job.description.ilike(f"%{search}%"))
+        )
+
+    if location:
+        query = query.filter(Job.location.ilike(f"%{location}%"))
+
+    if min_price is not None:
+        query = query.filter(Job.price >= min_price)
+
+    rows = query.order_by(Job.created_at.desc()).all()
+
 
     # Check if user is a student
     applied_job_ids = set()

@@ -17,9 +17,26 @@ router = APIRouter(prefix="/api/instructions", tags=["instructions"])
 
 # ─────────────────────────────── GET /api/instructions ─────────────────────────
 @router.get("", response_model=List[InstructionRead])
-def list_instructions(db: Session = Depends(get_db), user: Optional[User] = Depends(get_current_user_optional),):
+def list_instructions(
+    db: Session = Depends(get_db),
+    user: Optional[User] = Depends(get_current_user_optional),
+    search: Optional[str] = None,
+    min_hourly_rate: Optional[float] = None
+    ):
 
-    rows = db.query(Instruction).order_by(Instruction.created_at.desc()).all()
+    query = db.query(Instruction)
+
+    if search:
+        query = query.filter(
+            (Instruction.subject.ilike(f"%{search}%")) |
+            (Instruction.description.ilike(f"%{search}%"))
+        )
+
+    if min_hourly_rate is not None:
+        query = query.filter(Instruction.hourly_rate >= min_hourly_rate)
+
+    rows = query.order_by(Instruction.created_at.desc()).all()
+
     out: List[InstructionRead] = []
 
     saved_instruction_ids = set()

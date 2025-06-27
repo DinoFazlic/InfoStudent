@@ -3,23 +3,30 @@ const BASE =
   (typeof window === "undefined" ? "http://127.0.0.1:8000" : "");
 
 
-export async function listInstructions() {
-  const res = await fetch(`${BASE}/api/instructions`, {
+export async function listInstructions(filters = {}) {
+  const query = new URLSearchParams();
+
+  if (filters.search) query.append("search", filters.search);
+  if (filters.min_hourly_rate) query.append("min_hourly_rate", filters.min_hourly_rate);
+
+  const res = await fetch(`${BASE}/api/instructions?${query.toString()}`, {
     credentials: "include",
   });
+
   if (!res.ok) throw new Error("Greška dohvaćanja: " + res.status);
 
   const data = await res.json();
   return data.map((i) => ({
     ...i,
-    authorName:        i.author_name       ?? "Nepoznato",
-    authorAvatarUrl:   i.author_avatar_url ?? null,
-    createdAt:         i.created_at,
-    author_email:      i.author_email ?? null,
-    author_phone:      i.author_phone ?? null,
+    authorName: i.author_name ?? "Nepoznato",
+    authorAvatarUrl: i.author_avatar_url ?? null,
+    createdAt: i.created_at,
+    author_email: i.author_email ?? null,
+    author_phone: i.author_phone ?? null,
     author_schedule_url: i.author_schedule_url ?? null,
   }));
 }
+
 
 
 export async function createInstruction(payload) {

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 
@@ -13,8 +13,12 @@ router = APIRouter(prefix="/api/internships", tags=["Internships"])
 @router.get("", response_model=List[InternshipRead])
 def list_internships(
     db: Session = Depends(get_db),
-    current_user: Optional[User] = None
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    search: Optional[str] = Query(None),
+    location: Optional[str] = Query(None),
+    min_stipend: Optional[float] = Query(None),
 ):
+
     query = (
         db.query(
             Internship,
@@ -25,11 +29,25 @@ def list_internships(
             User.profile_photo_url,
             User.email.label("author_email"),
             EmployerProfile.company_name,
-        )
-        .join(User, Internship.created_by == User.id)
-        .outerjoin(EmployerProfile, User.id == EmployerProfile.user_id) 
-        .order_by(Internship.posted_at.desc())
+            )
+            .join(User, Internship.created_by == User.id)
+            .outerjoin(EmployerProfile, User.id == EmployerProfile.user_id)
     )
+
+    if search:
+        query = query.filter(
+            (Internship.title.ilike(f"%{search}%")) |
+            (Internship.description.ilike(f"%{search}%"))
+        )
+
+    if location:
+        query = query.filter(Internship.location.ilike(f"%{location}%"))
+
+    if min_stipend is not None:
+        query = query.filter(Internship.stipend != None, Internship.stipend >= min_stipend)
+
+    query = query.order_by(Internship.posted_at.desc())
+
 
     all_internships = query.all()
 

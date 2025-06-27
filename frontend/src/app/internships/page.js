@@ -27,15 +27,37 @@ export default function InternshipsPage() {
   const [me, setMe] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentInternshipId, setCurrentInternshipId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [minStipend, setMinStipend] = useState("");
+  const [allLocations, setAllLocations] = useState([]);
+
+
 
   useEffect(() => {
-    (async () => {
+    async function fetchInternships() {
+      setLoading(true);
       const user = await getMe().catch(() => null);
       setMe(user);
-      setItems(await listInternships().catch(() => []));
+
+      const filters = {
+        search: searchQuery || undefined,
+        location: locationFilter || undefined,
+        min_stipend: minStipend || undefined,
+      };
+
+      const data = await listInternships(filters).catch(() => []);
+      setItems(data);
+
+      const locations = [...new Set(data.map(i => i.location).filter(Boolean))];
+      setAllLocations(locations);
+
       setLoading(false);
-    })();
-  }, []);
+    }
+
+    fetchInternships();
+  }, [searchQuery, locationFilter, minStipend]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -146,6 +168,41 @@ export default function InternshipsPage() {
       <div className="container mx-auto flex-1 px-4 pt-6 pb-10">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-amber-600">Internships</h1>
+
+          <div className="flex flex-col md:flex-row gap-4 mt-4">
+            <input
+              type="text"
+              placeholder="Search internships..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full md:w-1/3 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            />
+            <select
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="w-full md:w-1/3 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            >
+              <option value="">All locations</option>
+              {allLocations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+            <select
+              value={minStipend}
+              onChange={(e) => setMinStipend(e.target.value)}
+              className="w-full md:w-1/3 px-4 py-2 border rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500"
+            >
+              <option value="">All stipends</option>
+              <option value="100">100 KM+</option>
+              <option value="300">300 KM+</option>
+              <option value="500">500 KM+</option>
+              <option value="700">700 KM+</option>
+              <option value="1000">1000 KM+</option>
+            </select>
+          </div>
+
 
           {!loading && (me?.role === "employer" || me?.role === "admin") && (
             <button
